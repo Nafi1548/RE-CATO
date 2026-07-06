@@ -1,0 +1,738 @@
+{
+    "application_name": "cato",
+    "output_data_file": "/home/cato/cato/results/hmp_145123994392386863103/home/cato/cato/output_50/max50_init10_iter490_damp0.0_2026-06-26-07-09-13/post_output_samples.csv",
+    "optimization_objectives": [
+        "neg_f1_score",
+        "compute_cost"
+    ],
+    "design_of_experiment": {
+        "doe_type": "random sampling",
+        "number_of_samples": 10
+    },
+    "optimization_iterations": 490,
+    "input_parameters": {
+        "s_winsize_sum": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.0,
+                1.0
+            ]
+        },
+        "s_winsize_med": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.00497875246652868,
+                0.9950212475334713
+            ]
+        },
+        "s_winsize_mean": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.005089870415132536,
+                0.9949101295848675
+            ]
+        },
+        "s_winsize_std": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.013791266948606551,
+                0.9862087330513934
+            ]
+        },
+        "d_winsize_mean": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.049561188862753736,
+                0.9504388111372463
+            ]
+        },
+        "d_winsize_sum": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.061901412281216484,
+                0.9380985877187835
+            ]
+        },
+        "d_winsize_med": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.06540352137703898,
+                0.934596478622961
+            ]
+        },
+        "s_bytes_sum": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.07006492366077599,
+                0.929935076339224
+            ]
+        },
+        "s_bytes_max": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.09857347789188198,
+                0.901426522108118
+            ]
+        },
+        "d_winsize_std": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.0973873763151718,
+                0.9026126236848282
+            ]
+        },
+        "s_bytes_std": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.09915451268606734,
+                0.9008454873139327
+            ]
+        },
+        "d_bytes_sum": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.10187010809175523,
+                0.8981298919082448
+            ]
+        },
+        "s_bytes_mean": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.11334516273962558,
+                0.8866548372603744
+            ]
+        },
+        "d_bytes_mean": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.11348987108458508,
+                0.8865101289154149
+            ]
+        },
+        "s_winsize_min": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.1160671659358099,
+                0.8839328340641901
+            ]
+        },
+        "d_winsize_min": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.12243351926072821,
+                0.8775664807392718
+            ]
+        },
+        "d_bytes_std": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.1352598673003943,
+                0.8647401326996057
+            ]
+        },
+        "d_ttl_sum": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.14249266068205835,
+                0.8575073393179417
+            ]
+        },
+        "d_winsize_max": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.22060251850514745,
+                0.7793974814948526
+            ]
+        },
+        "dur": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.22095672386055842,
+                0.7790432761394416
+            ]
+        },
+        "d_bytes_max": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.2228627476367725,
+                0.7771372523632275
+            ]
+        },
+        "s_iat_sum": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.2249371047038622,
+                0.7750628952961378
+            ]
+        },
+        "d_iat_max": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.23564595523017362,
+                0.7643540447698264
+            ]
+        },
+        "s_winsize_max": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.23561342839888022,
+                0.7643865716011198
+            ]
+        },
+        "s_iat_max": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.2548359616770287,
+                0.7451640383229713
+            ]
+        },
+        "d_iat_sum": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.25997915674434746,
+                0.7400208432556525
+            ]
+        },
+        "s_iat_mean": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.29344289645977883,
+                0.7065571035402212
+            ]
+        },
+        "d_load": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.2959972653859041,
+                0.7040027346140959
+            ]
+        },
+        "syn_ack": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.2976551083302642,
+                0.7023448916697358
+            ]
+        },
+        "s_load": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.30141392501122133,
+                0.6985860749887787
+            ]
+        },
+        "d_iat_mean": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.3092813773864359,
+                0.6907186226135641
+            ]
+        },
+        "d_ttl_mean": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.3155504220949371,
+                0.6844495779050629
+            ]
+        },
+        "s_iat_std": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.3164600506623836,
+                0.6835399493376164
+            ]
+        },
+        "d_ttl_max": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.3160331206884689,
+                0.6839668793115311
+            ]
+        },
+        "d_ttl_med": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.318193506863938,
+                0.681806493136062
+            ]
+        },
+        "d_ttl_min": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.3203418680510469,
+                0.6796581319489531
+            ]
+        },
+        "tcp_rtt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.3210333019787571,
+                0.6789666980212429
+            ]
+        },
+        "d_iat_med": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.35325576136764725,
+                0.6467442386323528
+            ]
+        },
+        "s_iat_med": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.3670103317989313,
+                0.6329896682010687
+            ]
+        },
+        "d_bytes_med": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.3730363274104923,
+                0.6269636725895077
+            ]
+        },
+        "d_iat_std": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.4010849756484719,
+                0.5989150243515281
+            ]
+        },
+        "s_ttl_sum": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.40260658745549804,
+                0.597393412544502
+            ]
+        },
+        "ack_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.41402746373532173,
+                0.5859725362646783
+            ]
+        },
+        "d_iat_min": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.4392736673413107,
+                0.5607263326586893
+            ]
+        },
+        "d_port": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.45293966273488084,
+                0.5470603372651192
+            ]
+        },
+        "s_port": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.4618690195461449,
+                0.5381309804538551
+            ]
+        },
+        "s_pkt_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.47907369172656855,
+                0.5209263082734314
+            ]
+        },
+        "d_pkt_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.48982769400154846,
+                0.5101723059984515
+            ]
+        },
+        "s_bytes_med": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.5222699877643131,
+                0.47773001223568684
+            ]
+        },
+        "ack_dat": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.5395734604399062,
+                0.46042653956009383
+            ]
+        },
+        "psh_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.5397755874934144,
+                0.46022441250658563
+            ]
+        },
+        "s_iat_min": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.5500929878936636,
+                0.4499070121063364
+            ]
+        },
+        "s_bytes_min": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.754594544348721,
+                0.24540545565127908
+            ]
+        },
+        "s_ttl_min": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.7881837485866415,
+                0.2118162514133585
+            ]
+        },
+        "s_ttl_max": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.7872585124609182,
+                0.21274148753908184
+            ]
+        },
+        "s_ttl_med": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.7844451592139515,
+                0.21555484078604845
+            ]
+        },
+        "d_bytes_min": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.7858291017668622,
+                0.2141708982331378
+            ]
+        },
+        "s_ttl_mean": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.7868240659437039,
+                0.21317593405629606
+            ]
+        },
+        "syn_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.8529146505286582,
+                0.14708534947134183
+            ]
+        },
+        "fin_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.8584741344585056,
+                0.1415258655414944
+            ]
+        },
+        "rst_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.9134511744666788,
+                0.0865488255333212
+            ]
+        },
+        "d_ttl_std": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.9750821487139547,
+                0.024917851286045244
+            ]
+        },
+        "ece_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.9969858031715425,
+                0.003014196828457482
+            ]
+        },
+        "cwr_cnt": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                0.9945918327969039,
+                0.005408167203096103
+            ]
+        },
+        "proto": {
+            "parameter_type": "categorical",
+            "values": [
+                "false",
+                "true"
+            ],
+            "prior": [
+                1.0,
+                0.0
+            ]
+        },
+        "pkt_depth": {
+            "parameter_type": "integer",
+            "values": [
+                1,
+                50
+            ],
+            "prior": "decay"
+        }
+    }
+}

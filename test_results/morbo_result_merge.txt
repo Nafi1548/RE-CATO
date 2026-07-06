@@ -1,0 +1,1634 @@
+# of tabu points: 0
+# of invalid centers: 0
+New metrics for center: tensor([[ 2.5994, -0.2313]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 1
+New metrics for center: tensor([[ 3.4917, -0.4334]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 2
+New metrics for center: tensor([[ 2.9797, -0.3723]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 1.6220, -0.1969]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 1.1650, -0.1668]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Time spent on sampling: 2152.2 seconds
+Time spent on HVI computations: 29.6 seconds
+Number of points selected from each TR: [13, 0, 0, 15, 22]
+Time spent on generating candidates: 2213.6 seconds
+# of tabu points: 0
+# of invalid centers: 1
+SUCCESS: hv ratio: 1.1357488455678857
+New metrics for center: tensor([[ 3.3533, -0.2439]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 1
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 2
+New metrics for center: tensor([[ 2.2429, -0.0741]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 3
+SUCCESS: hv ratio: 1.1094909011501526
+New metrics for center: tensor([[ 0.6557, -0.0628]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.2796755128353765
+New metrics for center: tensor([[ 0.7713, -0.0698]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+Time spent on model fitting: 165.5 seconds
+Time spent on model fitting: 165.5 seconds
+Total refill points: 0
+250) Current hypervolume: 1.261
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1838.0 seconds
+Time spent on HVI computations: 22.0 seconds
+Number of points selected from each TR: [8, 0, 16, 18, 8]
+Time spent on generating candidates: 1883.9 seconds
+# of tabu points: 0
+# of invalid centers: 2
+SUCCESS: hv ratio: 1.0952281356145026
+New metrics for center: tensor([[ 3.3228, -0.1285]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 2
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 2
+SUCCESS: hv ratio: 1.0633399336520952
+New metrics for center: tensor([[ 1.8601, -0.0277]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 3
+SUCCESS: hv ratio: 1.0033662460684902
+New metrics for center: tensor([[ 1.0577, -0.0135]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.0620855353723777
+New metrics for center: tensor([[ 2.2429, -0.0741]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+Time spent on model fitting: 469.3 seconds
+Time spent on model fitting: 469.3 seconds
+Total refill points: 0
+300) Current hypervolume: 1.479
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1880.1 seconds
+Time spent on HVI computations: 23.5 seconds
+Number of points selected from each TR: [14, 1, 12, 9, 14]
+Time spent on generating candidates: 1929.8 seconds
+# of tabu points: 0
+# of invalid centers: 2
+SUCCESS: hv ratio: 1.1376484817676071
+New metrics for center: tensor([[ 3.9341, -0.1557]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 1.5524, -0.0046]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 3.1800, -0.1177]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.0140794843812426
+Fitting a model
+Num points in TR: 200
+length: 0.8
+Time spent on model fitting: 496.4 seconds
+Time spent on model fitting: 496.5 seconds
+Total refill points: 0
+350) Current hypervolume: 1.703
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1830.7 seconds
+Time spent on HVI computations: 19.6 seconds
+Number of points selected from each TR: [13, 7, 4, 22, 4]
+Time spent on generating candidates: 1873.3 seconds
+# of tabu points: 0
+# of invalid centers: 2
+SUCCESS: hv ratio: 1.0117986814604436
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 2
+SUCCESS: hv ratio: 1.0011812213101567
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 1.9328, -0.0375]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.018224807134905
+New metrics for center: tensor([[ 3.2951, -0.0955]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 1.8715, -0.0222]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+Time spent on model fitting: 412.7 seconds
+Time spent on model fitting: 412.7 seconds
+Total refill points: 0
+400) Current hypervolume: 1.748
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 2161.2 seconds
+Time spent on HVI computations: 26.2 seconds
+Number of points selected from each TR: [20, 3, 2, 22, 3]
+Time spent on generating candidates: 2214.3 seconds
+# of tabu points: 0
+# of invalid centers: 3
+SUCCESS: hv ratio: 1.0208204185132088
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 2.0542, -0.0440]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.007441831586661
+New metrics for center: tensor([[ 3.8587, -0.1062]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.8
+Time spent on model fitting: 460.4 seconds
+Time spent on model fitting: 460.5 seconds
+Total refill points: 0
+450) Current hypervolume: 1.792
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1958.6 seconds
+Time spent on HVI computations: 23.1 seconds
+Number of points selected from each TR: [26, 0, 2, 21, 1]
+Time spent on generating candidates: 2004.4 seconds
+# of tabu points: 0
+# of invalid centers: 2
+SUCCESS: hv ratio: 1.1655386176860274
+New metrics for center: tensor([[ 4.3996, -0.0382]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 2
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 1.9328, -0.0375]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.0034373443512488
+New metrics for center: tensor([[ 4.3996, -0.0382]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.8
+Time spent on model fitting: 382.2 seconds
+Time spent on model fitting: 382.2 seconds
+Total refill points: 0
+500) Current hypervolume: 2.089
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1841.6 seconds
+Time spent on HVI computations: 21.6 seconds
+Number of points selected from each TR: [19, 1, 0, 30, 0]
+Time spent on generating candidates: 1892.9 seconds
+# of tabu points: 0
+# of invalid centers: 1
+SUCCESS: hv ratio: 1.0164303841264186
+New metrics for center: tensor([[ 4.4070, -0.0369]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 268
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 1
+Fitting a model
+Num points in TR: 200
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 2
+New metrics for center: tensor([[ 3.8088, -0.0207]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 3
+SUCCESS: hv ratio: 1.0165845619489193
+New metrics for center: tensor([[ 4.1966, -0.0257]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 229
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 1.9278, -0.0187]], dtype=torch.float64)
+Fitting a model
+Time spent on model fitting: 631.6 seconds
+Time spent on model fitting: 631.6 seconds
+Total refill points: 0
+550) Current hypervolume: 2.133
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1824.2 seconds
+Time spent on HVI computations: 21.4 seconds
+Number of points selected from each TR: [12, 0, 23, 8, 7]
+Time spent on generating candidates: 1871.6 seconds
+# of tabu points: 0
+# of invalid centers: 3
+SUCCESS: hv ratio: 1.002323837522574
+New metrics for center: tensor([[ 4.5687, -0.0365]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 317
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 3
+SUCCESS: hv ratio: 1.0073748917234502
+New metrics for center: tensor([[ 2.8037, -0.0086]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 279
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.0379842718985188
+New metrics for center: tensor([[ 3.6270, -0.0175]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 317
+length: 0.8
+Time spent on model fitting: 509.5 seconds
+Time spent on model fitting: 509.5 seconds
+Total refill points: 0
+600) Current hypervolume: 2.226
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1775.1 seconds
+Time spent on HVI computations: 23.7 seconds
+Number of points selected from each TR: [22, 0, 11, 11, 6]
+Time spent on generating candidates: 1821.1 seconds
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 1.9326, -0.0066]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 322
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 367
+length: 0.8
+Time spent on model fitting: 328.4 seconds
+Time spent on model fitting: 328.4 seconds
+Total refill points: 0
+650) Current hypervolume: 2.226
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1697.2 seconds
+Time spent on HVI computations: 28.4 seconds
+Number of points selected from each TR: [9, 0, 24, 6, 11]
+Time spent on generating candidates: 1749.6 seconds
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 3
+SUCCESS: hv ratio: 1.002157234244746
+New metrics for center: tensor([[ 3.9175, -0.0147]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 2.8037, -0.0086]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 386
+length: 0.8
+Time spent on model fitting: 384.3 seconds
+Time spent on model fitting: 384.3 seconds
+Total refill points: 0
+700) Current hypervolume: 2.231
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1880.8 seconds
+Time spent on HVI computations: 26.5 seconds
+Number of points selected from each TR: [14, 0, 16, 5, 15]
+Time spent on generating candidates: 1932.8 seconds
+# of tabu points: 0
+# of invalid centers: 1
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 2
+New metrics for center: tensor([[ 2.8416, -0.0035]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 2
+SUCCESS: hv ratio: 1.0034544475921288
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 4.4632, -0.0279]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.0013300174441113
+New metrics for center: tensor([[ 7.1531e-01, -6.2914e-04]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 413
+length: 0.8
+Time spent on model fitting: 519.0 seconds
+Time spent on model fitting: 519.0 seconds
+Total refill points: 0
+750) Current hypervolume: 2.243
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1842.4 seconds
+Time spent on HVI computations: 23.9 seconds
+Number of points selected from each TR: [5, 13, 10, 6, 16]
+Time spent on generating candidates: 1891.3 seconds
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.0016913452317724
+Fitting a model
+Num points in TR: 485
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.001735379298943
+New metrics for center: tensor([[ 3.1989, -0.0074]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.1595, -0.0159]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 463
+length: 0.8
+Time spent on model fitting: 518.0 seconds
+Time spent on model fitting: 518.1 seconds
+Total refill points: 0
+800) Current hypervolume: 2.250
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1801.0 seconds
+Time spent on HVI computations: 28.8 seconds
+Number of points selected from each TR: [6, 13, 7, 12, 12]
+Time spent on generating candidates: 1853.1 seconds
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 535
+length: 0.8
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.4
+Time spent on model fitting: 341.8 seconds
+Time spent on model fitting: 341.8 seconds
+Total refill points: 0
+850) Current hypervolume: 2.250
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1711.6 seconds
+Time spent on HVI computations: 21.7 seconds
+Number of points selected from each TR: [7, 20, 13, 6, 4]
+Time spent on generating candidates: 1750.0 seconds
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 201
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 3
+SUCCESS: hv ratio: 1.0018229763240347
+New metrics for center: tensor([[ 4.2118, -0.0094]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.3874, -0.0175]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.4
+Time spent on model fitting: 406.9 seconds
+Time spent on model fitting: 406.9 seconds
+Total refill points: 0
+900) Current hypervolume: 2.256
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1829.5 seconds
+Time spent on HVI computations: 30.3 seconds
+Number of points selected from each TR: [5, 13, 17, 13, 2]
+Time spent on generating candidates: 1888.6 seconds
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 233
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 218
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 3.1661, -0.0054]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.4
+Time spent on model fitting: 264.3 seconds
+Time spent on model fitting: 264.3 seconds
+Total refill points: 0
+950) Current hypervolume: 2.257
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1780.6 seconds
+Time spent on HVI computations: 28.6 seconds
+Number of points selected from each TR: [5, 8, 29, 6, 2]
+Time spent on generating candidates: 1832.2 seconds
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.0014976357951264
+New metrics for center: tensor([[ 4.1528, -0.0064]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 222
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 203
+length: 0.4
+Time spent on model fitting: 266.6 seconds
+Time spent on model fitting: 266.6 seconds
+Total refill points: 0
+1000) Current hypervolume: 2.260
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1756.9 seconds
+Time spent on HVI computations: 30.9 seconds
+Number of points selected from each TR: [2, 0, 30, 0, 18]
+Time spent on generating candidates: 1814.9 seconds
+# of tabu points: 0
+# of invalid centers: 1
+SUCCESS: hv ratio: 1.0015166068594867
+New metrics for center: tensor([[ 4.5761, -0.0368]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 2
+New metrics for center: tensor([[ 3.1092e+00, -5.4112e-04]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 2
+SUCCESS: hv ratio: 1.0044050729792686
+New metrics for center: tensor([[ 4.0565, -0.0041]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 315
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 4.3759, -0.0115]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 4
+SUCCESS: hv ratio: 1.003359445284751
+New metrics for center: tensor([[ 3.3744e+00, -1.0831e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 240
+length: 0.4
+Time spent on model fitting: 402.0 seconds
+Time spent on model fitting: 402.0 seconds
+Total refill points: 0
+1050) Current hypervolume: 2.275
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1701.4 seconds
+Time spent on HVI computations: 29.8 seconds
+Number of points selected from each TR: [0, 1, 17, 0, 32]
+Time spent on generating candidates: 1751.9 seconds
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.3515, -0.0065]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.4
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.2
+Time spent on model fitting: 210.2 seconds
+Time spent on model fitting: 210.2 seconds
+Total refill points: 0
+1100) Current hypervolume: 2.276
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1750.3 seconds
+Time spent on HVI computations: 25.4 seconds
+Number of points selected from each TR: [3, 6, 27, 5, 9]
+Time spent on generating candidates: 1794.1 seconds
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.4055, -0.0114]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.2
+Time spent on model fitting: 336.3 seconds
+Time spent on model fitting: 336.3 seconds
+Total refill points: 0
+1150) Current hypervolume: 2.277
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1885.4 seconds
+Time spent on HVI computations: 26.6 seconds
+Number of points selected from each TR: [8, 10, 18, 8, 6]
+Time spent on generating candidates: 1934.9 seconds
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 4.4079, -0.0070]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.2
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.4095, -0.0168]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.2
+Time spent on model fitting: 407.5 seconds
+Time spent on model fitting: 407.5 seconds
+Total refill points: 0
+1200) Current hypervolume: 2.278
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1777.9 seconds
+Time spent on HVI computations: 29.6 seconds
+Number of points selected from each TR: [14, 5, 12, 12, 7]
+Time spent on generating candidates: 1831.5 seconds
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 4.5778, -0.0311]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.05
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.2349e+00, -3.9548e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.05
+# of tabu points: 0
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.1
+Time spent on model fitting: 287.2 seconds
+Time spent on model fitting: 287.2 seconds
+Total refill points: 0
+1250) Current hypervolume: 2.279
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1728.3 seconds
+Time spent on HVI computations: 29.0 seconds
+Number of points selected from each TR: [22, 1, 16, 11, 0]
+Time spent on generating candidates: 1781.0 seconds
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 4.5796, -0.0306]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 0
+# of invalid centers: 3
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 3
+New metrics for center: tensor([[ 4.4639, -0.0127]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 0
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.0912e+00, -1.9853e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.05
+# of tabu points: 0
+# of invalid centers: 4
+Time spent on model fitting: 160.2 seconds
+Time spent on model fitting: 160.2 seconds
+Total refill points: 0
+1300) Current hypervolume: 2.281
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 0
+# of invalid centers: 4
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1743.0 seconds
+Time spent on HVI computations: 28.6 seconds
+Number of points selected from each TR: [21, 1, 23, 5, 0]
+Time spent on generating candidates: 1795.3 seconds
+# of tabu points: 0
+# of invalid centers: 4
+# of tabu points: 1
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 1
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.05
+# of tabu points: 1
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.2648e+00, -2.6484e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.05
+# of tabu points: 1
+# of invalid centers: 4
+Time spent on model fitting: 169.0 seconds
+Time spent on model fitting: 169.1 seconds
+Total refill points: 0
+1350) Current hypervolume: 2.282
+# of tabu points: 1
+# of invalid centers: 5
+New metrics for center: tensor([[ 4.3508, -0.0045]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 2112.5 seconds
+Time spent on HVI computations: 32.5 seconds
+Number of points selected from each TR: [3, 4, 25, 13, 5]
+Time spent on generating candidates: 2173.3 seconds
+# of tabu points: 1
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.4075, -0.0050]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 1
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 1
+# of invalid centers: 5
+New metrics for center: tensor([[ 4.3813e+00, -4.1664e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.1
+Time spent on model fitting: 336.1 seconds
+Time spent on model fitting: 336.1 seconds
+Total refill points: 0
+1400) Current hypervolume: 2.282
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 2294.5 seconds
+Time spent on HVI computations: 38.8 seconds
+Number of points selected from each TR: [8, 11, 10, 2, 19]
+Time spent on generating candidates: 2364.1 seconds
+# of tabu points: 1
+# of invalid centers: 3
+New metrics for center: tensor([[ 4.4347e+00, -4.1988e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 1
+# of invalid centers: 4
+New metrics for center: tensor([[ 3.4570e+00, -5.0575e-04]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.1
+# of tabu points: 1
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.3529e+00, -3.7634e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.2081e+00, -1.2196e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 5
+New metrics for center: tensor([[ 4.2648e+00, -2.6484e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.05
+Time spent on model fitting: 410.6 seconds
+Time spent on model fitting: 410.7 seconds
+Total refill points: 0
+1450) Current hypervolume: 2.283
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1763.1 seconds
+Time spent on HVI computations: 29.8 seconds
+Number of points selected from each TR: [7, 17, 2, 2, 22]
+Time spent on generating candidates: 1816.0 seconds
+# of tabu points: 1
+# of invalid centers: 5
+New metrics for center: tensor([[ 4.4630, -0.0059]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 1
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.05
+# of tabu points: 1
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.025
+Time spent on model fitting: 403.1 seconds
+Time spent on model fitting: 403.1 seconds
+Total refill points: 0
+1500) Current hypervolume: 2.283
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1654.9 seconds
+Time spent on HVI computations: 29.4 seconds
+Number of points selected from each TR: [0, 23, 4, 11, 12]
+Time spent on generating candidates: 1705.0 seconds
+# of tabu points: 1
+# of invalid centers: 4
+Fitting a model
+# of tabu points: 1
+# of invalid centers: 4
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.3499e+00, -2.4536e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.1777e+00, -6.0070e-04]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.025
+# of tabu points: 1
+# of invalid centers: 5
+New metrics for center: tensor([[ 4.2067e+00, -8.9838e-04]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.025
+Time spent on model fitting: 354.6 seconds
+Time spent on model fitting: 354.6 seconds
+Total refill points: 0
+1550) Current hypervolume: 2.284
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+# of tabu points: 1
+# of invalid centers: 5
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1841.3 seconds
+Time spent on HVI computations: 31.2 seconds
+Number of points selected from each TR: [0, 24, 9, 8, 9]
+Time spent on generating candidates: 1895.7 seconds
+# of tabu points: 1
+# of invalid centers: 2
+Fitting a model
+# of tabu points: 1
+# of invalid centers: 3
+# of tabu points: 2
+# of invalid centers: 3
+# of tabu points: 3
+# of invalid centers: 4
+# of tabu points: 4
+# of invalid centers: 5
+Time spent on model fitting: 102.3 seconds
+Time spent on model fitting: 102.3 seconds
+Total refill points: 0
+1600) Current hypervolume: 2.285
+# of tabu points: 5
+# of invalid centers: 5
+# of tabu points: 5
+# of invalid centers: 6
+New metrics for center: tensor([[ 4.2921e+00, -2.5454e-04]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 5
+# of invalid centers: 7
+New metrics for center: tensor([[ 3.5118e+00, -1.3491e-04]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 5
+# of invalid centers: 8
+New metrics for center: tensor([[ 4.4905, -0.0249]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 5
+# of invalid centers: 9
+New metrics for center: tensor([[ 4.4347e+00, -4.1988e-03]], dtype=torch.float64)
+Fitting a model
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1846.4 seconds
+Time spent on HVI computations: 28.9 seconds
+Number of points selected from each TR: [0, 0, 3, 47, 0]
+Time spent on generating candidates: 1898.6 seconds
+# of tabu points: 2
+# of invalid centers: 5
+# of tabu points: 2
+# of invalid centers: 5
+# of tabu points: 2
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 2
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+Time spent on model fitting: 21.5 seconds
+Time spent on model fitting: 21.5 seconds
+Total refill points: 0
+1650) Current hypervolume: 2.286
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 7
+New metrics for center: tensor([[ 4.5736, -0.0256]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 3
+# of invalid centers: 7
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1794.0 seconds
+Time spent on HVI computations: 33.9 seconds
+Number of points selected from each TR: [0, 2, 5, 43, 0]
+Time spent on generating candidates: 1854.2 seconds
+# of tabu points: 2
+# of invalid centers: 5
+Fitting a model
+# of tabu points: 2
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 2
+# of invalid centers: 5
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 2
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+Fitting a model
+Time spent on model fitting: 193.0 seconds
+Time spent on model fitting: 193.1 seconds
+Total refill points: 0
+1700) Current hypervolume: 2.286
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 7
+New metrics for center: tensor([[ 4.5187, -0.0243]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 3
+# of invalid centers: 7
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1737.9 seconds
+Time spent on HVI computations: 30.9 seconds
+Number of points selected from each TR: [0, 4, 11, 35, 0]
+Time spent on generating candidates: 1792.1 seconds
+# of tabu points: 2
+# of invalid centers: 5
+Fitting a model
+# of tabu points: 2
+# of invalid centers: 5
+New metrics for center: tensor([[ 4.2637e+00, -1.9990e-04]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 2
+# of invalid centers: 5
+New metrics for center: tensor([[ 3.5116e+00, -8.9818e-05]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 2
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+Fitting a model
+Time spent on model fitting: 247.4 seconds
+Time spent on model fitting: 247.4 seconds
+Total refill points: 0
+1750) Current hypervolume: 2.286
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 3
+# of invalid centers: 7
+New metrics for center: tensor([[ 4.2921e+00, -2.5454e-04]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 3
+# of invalid centers: 7
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1784.6 seconds
+Time spent on HVI computations: 30.7 seconds
+Number of points selected from each TR: [2, 13, 16, 18, 1]
+Time spent on generating candidates: 1839.0 seconds
+# of tabu points: 2
+# of invalid centers: 3
+# of tabu points: 3
+# of invalid centers: 4
+New metrics for center: tensor([[ 4.2634e+00, -2.6393e-05]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+# of tabu points: 3
+# of invalid centers: 5
+# of tabu points: 4
+# of invalid centers: 6
+New metrics for center: tensor([[ 4.2921e+00, -8.9708e-05]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.0015625
+# of tabu points: 4
+# of invalid centers: 6
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+Time spent on model fitting: 161.0 seconds
+Time spent on model fitting: 161.1 seconds
+Total refill points: 0
+1800) Current hypervolume: 2.286
+# of tabu points: 4
+# of invalid centers: 7
+New metrics for center: tensor([[ 4.4626, -0.0052]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 4
+# of invalid centers: 7
+# of tabu points: 4
+# of invalid centers: 8
+New metrics for center: tensor([[ 4.4655, -0.0110]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 4
+# of invalid centers: 8
+# of tabu points: 4
+# of invalid centers: 8
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1834.1 seconds
+Time spent on HVI computations: 31.9 seconds
+Number of points selected from each TR: [0, 15, 0, 31, 4]
+Time spent on generating candidates: 1892.7 seconds
+# of tabu points: 2
+# of invalid centers: 5
+Fitting a model
+# of tabu points: 2
+# of invalid centers: 5
+# of tabu points: 3
+# of invalid centers: 5
+Fitting a model
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 4
+# of invalid centers: 6
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+Time spent on model fitting: 254.2 seconds
+Time spent on model fitting: 254.2 seconds
+Total refill points: 0
+1850) Current hypervolume: 2.286
+# of tabu points: 4
+# of invalid centers: 6
+# of tabu points: 4
+# of invalid centers: 7
+New metrics for center: tensor([[ 4.5187, -0.0239]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 4
+# of invalid centers: 7
+# of tabu points: 4
+# of invalid centers: 8
+New metrics for center: tensor([[ 4.3499e+00, -2.1963e-03]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 4
+# of invalid centers: 8
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1786.7 seconds
+Time spent on HVI computations: 30.9 seconds
+Number of points selected from each TR: [8, 27, 5, 0, 10]
+Time spent on generating candidates: 1841.7 seconds
+# of tabu points: 3
+# of invalid centers: 6
+New metrics for center: tensor([[ 4.4628, -0.0049]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.00625
+# of tabu points: 3
+# of invalid centers: 6
+# of tabu points: 4
+# of invalid centers: 7
+New metrics for center: tensor([[ 4.4657, -0.0109]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.00625
+# of tabu points: 4
+# of invalid centers: 7
+# of tabu points: 4
+# of invalid centers: 7
+Fitting a model
+Num points in TR: 200
+length: 0.0125
+Time spent on model fitting: 148.6 seconds
+Time spent on model fitting: 148.6 seconds
+Total refill points: 0
+1900) Current hypervolume: 2.286
+# of tabu points: 4
+# of invalid centers: 7
+# of tabu points: 4
+# of invalid centers: 8
+New metrics for center: tensor([[ 4.5187, -0.0242]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 4
+# of invalid centers: 8
+# of tabu points: 4
+# of invalid centers: 8
+# of tabu points: 4
+# of invalid centers: 8
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1690.3 seconds
+Time spent on HVI computations: 29.4 seconds
+Number of points selected from each TR: [17, 0, 12, 1, 20]
+Time spent on generating candidates: 1738.2 seconds
+# of tabu points: 4
+# of invalid centers: 7
+# of tabu points: 5
+# of invalid centers: 7
+# of tabu points: 5
+# of invalid centers: 8
+New metrics for center: tensor([[ 4.4910, -0.0065]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.00625
+# of tabu points: 5
+# of invalid centers: 8
+New metrics for center: tensor([[ 4.3498e+00, -2.1653e-03]], dtype=torch.float64)
+Fitting a model
+Num points in TR: 200
+length: 0.00078125
+# of tabu points: 5
+# of invalid centers: 8
+Time spent on model fitting: 50.3 seconds
+Time spent on model fitting: 50.4 seconds
+Total refill points: 0
+1950) Current hypervolume: 2.287
+# of tabu points: 6
+# of invalid centers: 9
+New metrics for center: tensor([[ 4.3784e+00, -3.1452e-03]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 6
+# of invalid centers: 9
+# of tabu points: 6
+# of invalid centers: 9
+# of tabu points: 6
+# of invalid centers: 9
+# of tabu points: 6
+# of invalid centers: 10
+New metrics for center: tensor([[ 4.5463, -0.0246]], dtype=torch.float64)
+Fitting a model
+Results synced to experiments/rover/results_seed_1.pt
+Time spent on sampling: 1770.1 seconds
+Time spent on HVI computations: 33.6 seconds
+Number of points selected from each TR: [1, 0, 28, 1, 20]
+Time spent on generating candidates: 1829.8 seconds
+# of tabu points: 6
+# of invalid centers: 9
+Fitting a model
+Num points in TR: 200
+length: 0.003125
+# of tabu points: 6
+# of invalid centers: 9
+Fitting a model
+# of tabu points: 6
+# of invalid centers: 10
+# of tabu points: 7
+# of invalid centers: 10
+Fitting a model
+Num points in TR: 200
+length: 0.00078125
+# of tabu points: 7
+# of invalid centers: 10
+Time spent on model fitting: 91.3 seconds
+Time spent on model fitting: 91.3 seconds
+Total refill points: 0
+2000) Current hypervolume: 2.287
+# of tabu points: 8
+# of invalid centers: 10
+# of tabu points: 8
+# of invalid centers: 10
+# of tabu points: 8
+# of invalid centers: 11
+New metrics for center: tensor([[ 4.4911, -0.0061]], dtype=torch.float64)
+Fitting a model
+# of tabu points: 8
+# of invalid centers: 11
+# of tabu points: 8
+# of invalid centers: 12
+New metrics for center: tensor([[ 4.5730, -0.0249]], dtype=torch.float64)
+Fitting a model
+Results synced to experiments/rover/results_seed_1.pt
+Total time: 80146.9 seconds
+Results synced to experiments/rover/results_seed_1.pt
