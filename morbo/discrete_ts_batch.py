@@ -25,7 +25,7 @@ from botorch.utils.multi_objective.box_decompositions.non_dominated import (
 )
 from botorch.utils.multi_objective.pareto import is_non_dominated
 from torch import Tensor
-
+from morbo.utils import sample_tr_discrete_points_subset_d, sample_tr_pure_discrete_subset
 from botorch.utils.sampling import sample_simplex
 
 from morbo.state import TRBOState
@@ -195,26 +195,46 @@ def generate_chebyshev_pool(trbo_state, tr, model, n_restarts=5, step=150, inter
     ordinal_config = getattr(trbo_state.tr_hparams, "ordinal_config", None) or []
     cont_dims = getattr(trbo_state.tr_hparams, "cont_dims", None) or []
     config = getattr(trbo_state.tr_hparams, "config", None) or []
-    
+    # --- FIX: Explicitly define cat_dims for the mixed-space sampler ---
+    cat_dims = getattr(trbo_state.tr_hparams, "cat_dims", None) or (binary_dims + ordinal_dims)
     # Fetch the raw_samples hyperparameter (defaulting to 4096)
     raw_samples = getattr(trbo_state.tr_hparams, "raw_samples", 4096)
-    
+    use_log_warp = getattr(trbo_state.tr_hparams, "use_log_warp", False)
+
     x_center = tr.X_center_normalized.cpu().numpy().flatten()
     length_discrete = int(tr.length_discrete.item())
-    
-    # ---------------------------------------------------------
-    # 1. MORBO EXPLORATION: Dense Random Sampling inside TR
-    # ---------------------------------------------------------
-    # For CATO, the space is discrete, so we generate a massive pool of neighbors
-    X_random = sample_tr_pure_discrete_subset(
-        best_X=tr.X_center_normalized.unsqueeze(0),
-        n_discrete_points=raw_samples,
-        length_discrete=length_discrete,
-        binary_dims=binary_dims,
-        ordinal_dims=ordinal_dims,
-        ordinal_config=ordinal_config
-    ).to(**tkwargs)
 
+    if len(cont_dims) > 0:
+        # Use the mixed-space subset sampler
+        X_random = sample_tr_discrete_points_subset_d(
+            best_X=tr.X_center_normalized.unsqueeze(0),
+            normalized_tr_bounds=tr.get_bounds(),
+            n_discrete_points=raw_samples,
+            length=tr.length.item(),
+            cat_dims=cat_dims,
+            cont_dims=cont_dims,
+            length_discrete=length_discrete,
+            config=config,
+            binary_dims=binary_dims,
+            ordinal_dims=ordinal_dims,
+            ordinal_config=ordinal_config
+        ).to(**tkwargs)
+    else:
+        # ---------------------------------------------------------
+        # 1. MORBO EXPLORATION: Dense Random Sampling inside TR
+        # ---------------------------------------------------------
+        # For CATO, the space is discrete, so we generate a massive pool of neighbors
+    
+        # Use the pure discrete sampler
+        X_random = sample_tr_pure_discrete_subset(
+            best_X=tr.X_center_normalized.unsqueeze(0),
+            n_discrete_points=raw_samples,
+            length_discrete=length_discrete,
+            binary_dims=binary_dims,
+            ordinal_dims=ordinal_dims,
+            ordinal_config=ordinal_config
+        ).to(**tkwargs)
+    
     # ---------------------------------------------------------
     # 2. CASMOPOLITAN EXPLOITATION: Guided Chebyshev Search
     # ---------------------------------------------------------
@@ -245,7 +265,8 @@ def generate_chebyshev_pool(trbo_state, tr, model, n_restarts=5, step=150, inter
             n_restart=1, 
             batch_size=1,
             interval=interval,
-            step=step
+            step=step,
+            use_log_warp=use_log_warp,
         )
         pool_X_cheb.append(best_x_np[0])
         

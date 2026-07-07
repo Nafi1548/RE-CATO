@@ -136,7 +136,11 @@ class TurboHParams:
     binary_dims: Optional[List[int]] = None
     ordinal_dims: Optional[List[int]] = None
     ordinal_config: Optional[List[int]] = None
-
+    
+    use_log_warp: bool = False
+    use_unified_kernel: bool = False
+    use_mixture_kernel: bool = False
+    use_casmo_mixed_kernel: bool = False
 
     n_trust_regions: int = 5
     batch_size: int = 100
@@ -221,7 +225,7 @@ class TurboHParams:
         unexpected_keys = received_keys - expected_keys
         if unexpected_keys:
             print(
-                warning(f"Got unexpected tr_hparams keys, ignoring: {unexpected_keys}")
+                Warning(f"Got unexpected tr_hparams keys, ignoring: {unexpected_keys}")
             )
         filtered_keys = expected_keys & received_keys
         return cls(**{k: tr_hparams[k] for k in filtered_keys})
@@ -379,6 +383,10 @@ class TrustRegion(ABC, Module):
                 binary_dims=self.tr_hparams.binary_dims,
                 ordinal_dims=self.tr_hparams.ordinal_dims,
                 ordinal_config=self.tr_hparams.ordinal_config,
+                use_log_warp=self.tr_hparams.use_log_warp,
+                use_unified_kernel=self.tr_hparams.use_unified_kernel,
+                use_mixture_kernel=self.tr_hparams.use_mixture_kernel,
+                use_casmo_mixed_kernel=self.tr_hparams.use_casmo_mixed_kernel,
             )
             return True
         return False

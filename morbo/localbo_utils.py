@@ -415,7 +415,7 @@ def local_search(x_center, f: Callable,
 import random
 import numpy as np
 
-def sample_neighbour_mixed(x, binary_dims: list[int], ordinal_dims: list[int], ordinal_config: list[int], max_hamming_dist: int):
+def sample_neighbour_mixed(x, binary_dims: list[int], ordinal_dims: list[int], ordinal_config: list[int], max_hamming_dist: int, use_log_warp: bool = False):
     """
     Generates a localized neighbor in a true mixed discrete space.
     Flips a single bit for binary variables, or increments/decrements 
@@ -440,49 +440,73 @@ def sample_neighbour_mixed(x, binary_dims: list[int], ordinal_dims: list[int], o
         # 1. Strict Binary Topology: Flip a random bit
         choice = random.choice(binary_dims)
         x_pert[choice] = 1 - x_pert[choice]
+    # else:
+    #     # # 2. Strict Ordinal Topology: Step exactly +/- 1 within bounds
+    #     # idx = random.randint(0, len(ordinal_dims) - 1)
+    #     # choice = ordinal_dims[idx]
+    #     # max_choices = ordinal_config[idx]
+        
+    #     # # Adaptive Scaling for Local Search
+    #     # dynamic_radius = max(1, int(max_choices * tr_ratio * 0.1)) # 10% decay for local exploitation
+    #     # # step = random.randint(1, dynamic_radius) * random.choice([-1, 1])
+    #     # # REPLACE WITH:
+    #     # import math
+    #     # log_step = random.uniform(0, math.log(dynamic_radius + 1))
+    #     # step_size = max(1, int(math.exp(log_step)))
+    #     # step = step_size * random.choice([-1, 1])
+
+    #     # curr_val = int(x_pert[choice])
+    #     # # step = random.choice([-1, 1])
+        
+    #     # # Clamp strictly within the true parameter index bounds
+    #     # x_pert[choice] = max(0, min(max_choices - 1, curr_val + step))
+
+    #     # 2. Strict Ordinal Topology: Log-Warped Local Step
+    #     idx = random.randint(0, len(ordinal_dims) - 1)
+    #     choice = ordinal_dims[idx]
+    #     max_choices = ordinal_config[idx]
+        
+    #     import math
+    #     curr_val = int(x_pert[choice])
+        
+    #     # 1. Map to log-space
+    #     z_max = math.log(max_choices)
+    #     z_curr = math.log(curr_val + 1)
+        
+    #     # 2. Adaptive Scaling for Local Search (10% of the TR radius)
+    #     r_log = (tr_ratio * 0.1) * z_max
+        
+    #     # 3. Bounded local draw
+    #     z_min_bound = max(0.0, z_curr - r_log)
+    #     z_max_bound = min(z_max, z_curr + r_log)
+    #     z_new = random.uniform(z_min_bound, z_max_bound)
+        
+    #     # 4. Map back and clamp
+    #     new_val = int(math.exp(z_new)) - 1
+    #     x_pert[choice] = max(0, min(max_choices - 1, new_val))
     else:
-        # # 2. Strict Ordinal Topology: Step exactly +/- 1 within bounds
-        # idx = random.randint(0, len(ordinal_dims) - 1)
-        # choice = ordinal_dims[idx]
-        # max_choices = ordinal_config[idx]
-        
-        # # Adaptive Scaling for Local Search
-        # dynamic_radius = max(1, int(max_choices * tr_ratio * 0.1)) # 10% decay for local exploitation
-        # # step = random.randint(1, dynamic_radius) * random.choice([-1, 1])
-        # # REPLACE WITH:
-        # import math
-        # log_step = random.uniform(0, math.log(dynamic_radius + 1))
-        # step_size = max(1, int(math.exp(log_step)))
-        # step = step_size * random.choice([-1, 1])
-
-        # curr_val = int(x_pert[choice])
-        # # step = random.choice([-1, 1])
-        
-        # # Clamp strictly within the true parameter index bounds
-        # x_pert[choice] = max(0, min(max_choices - 1, curr_val + step))
-
-        # 2. Strict Ordinal Topology: Log-Warped Local Step
+        # Ordinal Topology Step
         idx = random.randint(0, len(ordinal_dims) - 1)
         choice = ordinal_dims[idx]
         max_choices = ordinal_config[idx]
-        
-        import math
         curr_val = int(x_pert[choice])
         
-        # 1. Map to log-space
-        z_max = math.log(max_choices)
-        z_curr = math.log(curr_val + 1)
-        
-        # 2. Adaptive Scaling for Local Search (10% of the TR radius)
-        r_log = (tr_ratio * 0.1) * z_max
-        
-        # 3. Bounded local draw
-        z_min_bound = max(0.0, z_curr - r_log)
-        z_max_bound = min(z_max, z_curr + r_log)
-        z_new = random.uniform(z_min_bound, z_max_bound)
-        
-        # 4. Map back and clamp
-        new_val = int(math.exp(z_new)) - 1
+        if use_log_warp:
+            # Log-Warped Local Step (Exploits percentage changes)
+            import math
+            z_max = math.log(max_choices)
+            z_curr = math.log(curr_val + 1)
+            r_log = (tr_ratio * 0.1) * z_max
+            z_min_bound = max(0.0, z_curr - r_log)
+            z_max_bound = min(z_max, z_curr + r_log)
+            z_new = random.uniform(z_min_bound, z_max_bound)
+            new_val = int(math.exp(z_new)) - 1
+        else:
+            # Strict Linear Step (Exploits absolute gaps)
+            dynamic_radius = max(1, int(max_choices * tr_ratio * 0.1))
+            step = random.randint(1, dynamic_radius) * random.choice([-1, 1])
+            new_val = curr_val + step
+            
         x_pert[choice] = max(0, min(max_choices - 1, new_val))
         
     return x_pert
@@ -645,7 +669,8 @@ def interleaved_search(x_center, f: Callable,
                        n_restart: int = 1,
                        batch_size: int = 1,
                        interval: int = 1,
-                       step: int = 200):
+                       step: int = 200,
+                       use_log_warp: bool = False):
     """
     Interleaved search combining both first-order gradient-based method on the continuous variables and the local search
     for the categorical variables.
@@ -801,7 +826,7 @@ def interleaved_search(x_center, f: Callable,
                         # else:
                         #     tol_ -= 1
 
-                        neighbour = sample_neighbour_mixed(x, binary_dims, ordinal_dims, ordinal_config, max_hamming_dist)
+                        neighbour = sample_neighbour_mixed(x, binary_dims, ordinal_dims, ordinal_config, max_hamming_dist, use_log_warp=use_log_warp)
                         
                         # Pass ordinal_config to normalize the distance
                         total_discrete_dist = compute_mixed_discrete_distance(

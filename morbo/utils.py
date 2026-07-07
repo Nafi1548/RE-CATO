@@ -30,7 +30,7 @@ from gpytorch.priors.torch_priors import GammaPrior
 from torch import Tensor
 from torch.distributions import Normal
 # from morbo.kernels import UnifiedDiscreteKernel
-from morbo.kernels import UnifiedL1DiscreteKernel
+from morbo.kernels import UnifiedL1DiscreteKernel,DiscreteMixtureKernel
 
 def sample_tr_discrete_points(
     X_center: Tensor, length: float, n_discrete_points: int, qmc: bool = False
@@ -210,7 +210,7 @@ def sample_tr_discrete_points(
     
 #     return X_cand
 
-def sample_tr_pure_discrete_subset(best_X, n_discrete_points, length_discrete, binary_dims, ordinal_dims, ordinal_config):
+def sample_tr_pure_discrete_subset(best_X, n_discrete_points, length_discrete, binary_dims, ordinal_dims, ordinal_config, use_log_warp=False):
     # FIX BUG 2: Safe handling of multi-row Pareto fronts
     if best_X.shape[0] == 1:
         # X_cand = best_X.repeat(n_discrete_points, 1)
@@ -266,62 +266,42 @@ def sample_tr_pure_discrete_subset(best_X, n_discrete_points, length_discrete, b
     #                 ordinal_moves += 1 # Consumes max 1.0 of the budget
 
         # FIX: Implement log-uniform Jeffreys prior for scale parameter exploration
+    # In morbo/utils.py -> sample_tr_pure_discrete_subset
     for i in range(n_discrete_points):
         total_hamming = length_discrete
         ordinal_moves = 0
         
         for idx in range(d_ord):
-            n_cat = ordinal_config[idx] # Maximum value + 1
+            n_cat = ordinal_config[idx] 
             current_val = int(X_cand_ord[i, idx].item())
             
-            # Draw a log-uniform sample natively in the space: 
-            # val = exp( U(0, 1) * log(n_cat) ) - 1
-            # Log-uniform Jeffreys prior draw: int(exp(U(0,1) * log(n_cat))) - 1
-            # import math
-            # u = torch.rand(1).item()
-            # proposed_val = int(math.exp(u * math.log(n_cat))) - 1
-            
-            # # Clamp securely to bounds
-            # new_val = max(0, min(n_cat - 1, proposed_val))
+            if use_log_warp:
+                # Native log-space draw (Jeffreys)
+                import math
+                z_max = math.log(n_cat)
+                z_curr = math.log(current_val + 1)
+                r_log = tr_ratio * z_max
+                z_min_bound = max(0.0, z_curr - r_log)
+                z_max_bound = min(z_max, z_curr + r_log)
+                
+                u = torch.rand(1).item()
+                z_new = z_min_bound + u * (z_max_bound - z_min_bound)
+                new_val = int(math.exp(z_new)) - 1
+            else:
+                # Linear uniform draw bounded by TR ratio
+                dynamic_radius = max(1, int(n_cat * tr_ratio))
+                left_radius = min(dynamic_radius, current_val)
+                right_radius = min(dynamic_radius, n_cat - 1 - current_val)
+                
+                step = 0
+                if left_radius + right_radius > 0:
+                    step = torch.randint(-left_radius, right_radius + 1, (1,)).item()
+                new_val = current_val + step
 
-            # --- WITH THIS ---
-            # 1. Scale the maximum allowable jump by the TR ratio
-            # dynamic_radius = max(1, int(n_cat * tr_ratio))
-            
-            import math
-            # 1. Map center and absolute bounds to log space
-            z_max = math.log(n_cat)
-            z_curr = math.log(current_val + 1)
-            
-            # 2. Define the TR radius natively in log space
-            r_log = tr_ratio * z_max
-            
-            # 3. Define strict local bounds and draw uniformly
-            z_min_bound = max(0.0, z_curr - r_log)
-            z_max_bound = min(z_max, z_curr + r_log)
-            
-            u = torch.rand(1).item()
-            z_new = z_min_bound + u * (z_max_bound - z_min_bound)
-            
-            # 4. Map back to linear integer space and clamp securely
-            new_val = int(math.exp(z_new)) - 1
             new_val = max(0, min(n_cat - 1, new_val))
-
-            # 2. Draw a log-uniform step size within that dynamic radius
-            # import math
-            # u = torch.rand(1).item()
-            # step_mag = int(math.exp(u * math.log(dynamic_radius + 1))) - 1
-            
-            # 3. Apply the step direction randomly
-            # step = step_mag * (1 if torch.rand(1).item() > 0.5 else -1)
-            
-            # 4. Anchor to current_val and clamp securely
-            # new_val = max(0, min(n_cat - 1, current_val + step))
-            # new_val = max(0, min(n_cat - 1, int(exp(u * log(n_cat + 1))) - 1))
-
             if new_val != current_val:
                 X_cand_ord[i, idx] = new_val
-                ordinal_moves += 1 # Consumes 1 unit of Hamming budget
+                ordinal_moves += 1
         
         # # Spend remaining budget on binary dimensions
         # binary_budget = max(1, total_hamming - ordinal_moves)
@@ -767,7 +747,7 @@ def get_fitted_model(
     Y: Tensor,
     use_ard: bool,
     max_cholesky_size: int,
-    cat_dims: Optional[List[int]] = None,     # --- ADDED FOR MIXED SPACE ---
+    cat_dims: Optional[List[int]] = None,     # --- ADDED FOR MIXED SPACdef get_fitted_model(E ---
     cont_dims: Optional[List[int]] = None,    # --- ADDED FOR MIXED SPACE ---
     state_dict: Optional[Dict[str, Tensor]] = None,
     input_transform: Optional[InputTransform] = None,
@@ -777,6 +757,10 @@ def get_fitted_model(
     binary_dims: Optional[List[int]] = None,
     ordinal_dims: Optional[List[int]] = None,
     ordinal_config: Optional[List[int]] = None,
+    use_log_warp: bool = False,
+    use_unified_kernel: bool = True,
+    use_mixture_kernel: bool = False,
+    use_casmo_mixed_kernel: bool = False,
 ) -> Model:
     print("Fitting a model")
     use_fast_mvms = True if X.shape[0] > max_cholesky_size else False
@@ -860,15 +844,111 @@ def get_fitted_model(
             #     )
 
             # 1. PURE DISCRETE (Your New Architecture)
-            if binary_dims and not cont_dims:
+            # if binary_dims and not cont_dims:
+            #     n_binary = len(binary_dims)
+            #     total_dims = n_binary + len(ordinal_dims)
+
+            #     if i == 0:
+            #         # F1: depth's effect is conditional on which features were picked.
+            #         # Genuine interaction → keep the single combined product kernel.
+            #         ls_max_ord_f1 = float(len(binary_dims))   # 66.0 — scale-invariant
+
+            #         unified_config = [1.0] * total_dims
+            #         if ordinal_dims and ordinal_config:
+            #             for idx, dim in enumerate(ordinal_dims):
+            #                 unified_config[dim] = max(1, ordinal_config[idx] - 1)
+                            
+            #         covar_module = ScaleKernel(
+            #             UnifiedL1DiscreteKernel(
+            #                 config=unified_config,
+            #                 use_log_warp=use_log_warp,
+            #                 lengthscale_constraint=Interval(0.01, ls_max_ord_f1),
+            #             )
+            #         )
+            #     else:
+            #         # Compute cost: depth carries an independent, near-fixed marginal
+            #         # penalty regardless of feature selection. Split binary/ordinal into
+            #         # separate kernels so a depth match alone preserves correlation even
+            #         # when the binary block is completely different.
+            #         binary_kern = UnifiedL1DiscreteKernel(
+            #             config=[1.0] * n_binary,
+            #             active_dims=binary_dims,
+            #             use_log_warp=use_log_warp,
+            #             lengthscale_constraint=Interval(0.01, 2.5),
+            #         )
+            #         ordinal_kern = UnifiedL1DiscreteKernel(
+            #             config=[max(1, c - 1) for c in ordinal_config] if ordinal_config else [1.0],
+            #             active_dims=ordinal_dims,
+            #             use_log_warp=use_log_warp,
+            #             # Force the GP to assign a minimum penalty to ordinal distances
+            #             lengthscale_constraint=Interval(0.01, 2.5),
+            #             # lengthscale_constraint=Interval(1e-5, 2.5)
+            #         )
+            #         covar_module = ScaleKernel(binary_kern) + ScaleKernel(ordinal_kern)
+            # APPLY THE CASMOPOLITAN MIXED KERNEL HERE:
+            if use_casmo_mixed_kernel and cat_dims is not None and cont_dims is not None:
+                covar_module = ScaleKernel(
+                    MixtureKernel(
+                        categorical_dims=cat_dims,
+                        continuous_dims=cont_dims,
+                        integer_dims=cont_dims, # Enforce WrappedMatern rounding on the continuous packet depth
+                        categorical_ard=use_ard,
+                        continuous_ard=use_ard,
+                    )
+                )
+            # 1. PURE DISCRETE (Your Custom Architectures)
+            elif binary_dims and not cont_dims:
                 n_binary = len(binary_dims)
                 total_dims = n_binary + len(ordinal_dims)
-
-                if i == 0:
-                    # F1: depth's effect is conditional on which features were picked.
-                    # Genuine interaction → keep the single combined product kernel.
-                    ls_max_ord_f1 = float(len(binary_dims))   # 66.0 — scale-invariant
-
+                ls_max_ord = float(n_binary)
+                # ---------------------------------------------------------
+                # PATH 1: The Domain-Aware Asymmetric Baseline (Your Original Intent)
+                # F1 (i==0) gets Unified/Interactive, Cost (i==1) gets Additive
+                # ---------------------------------------------------------
+                if not use_unified_kernel and not use_mixture_kernel: # (or explicitly use_asymmetric_kernels)
+                    if i == 0:
+                        # F1 SCORE: Highly Interactive (Unified Product Kernel)
+                        unified_config = [1.0] * total_dims
+                        if ordinal_dims and ordinal_config:
+                            for idx, dim in enumerate(ordinal_dims):
+                                unified_config[dim] = max(1, ordinal_config[idx] - 1)
+                                
+                        covar_module = ScaleKernel(
+                            UnifiedL1DiscreteKernel(
+                                config=unified_config,
+                                use_log_warp=use_log_warp,
+                                lengthscale_constraint=Interval(0.01, ls_max_ord),
+                            )
+                        )
+                    else:
+                        # COMPUTE COST: Largely Independent (Additive Kernel)
+                        binary_kern = UnifiedL1DiscreteKernel(
+                            config=[1.0] * n_binary,
+                            active_dims=binary_dims,
+                            lengthscale_constraint=Interval(0.01, 2.5),
+                        )
+                        ordinal_kern = UnifiedL1DiscreteKernel(
+                            config=[max(1, c - 1) for c in ordinal_config] if ordinal_config else [1.0],
+                            active_dims=ordinal_dims,
+                            use_log_warp=use_log_warp,
+                            lengthscale_constraint=Interval(0.01, 2.5),
+                        )
+                        covar_module = ScaleKernel(binary_kern) + ScaleKernel(ordinal_kern)
+                        
+                # PATH A: Mixture Kernel (Learnable Lambda)
+                if use_mixture_kernel:
+                    covar_module = ScaleKernel(
+                        DiscreteMixtureKernel(
+                            binary_dims=binary_dims,
+                            ordinal_dims=ordinal_dims,
+                            ordinal_config=ordinal_config,
+                            use_log_warp=use_log_warp,
+                            lengthscale_constraint=Interval(0.01, 2.5),
+                        )
+                    )
+                
+                # PATH B: Unified Product Kernel (Strong Interactions)
+                elif use_unified_kernel:
                     unified_config = [1.0] * total_dims
                     if ordinal_dims and ordinal_config:
                         for idx, dim in enumerate(ordinal_dims):
@@ -877,14 +957,13 @@ def get_fitted_model(
                     covar_module = ScaleKernel(
                         UnifiedL1DiscreteKernel(
                             config=unified_config,
-                            lengthscale_constraint=Interval(0.01, ls_max_ord_f1),
+                            use_log_warp=use_log_warp,
+                            lengthscale_constraint=Interval(0.01, ls_max_ord),
                         )
                     )
+                
+                # PATH C: Independent Additive Kernels (No Interactions)
                 else:
-                    # Compute cost: depth carries an independent, near-fixed marginal
-                    # penalty regardless of feature selection. Split binary/ordinal into
-                    # separate kernels so a depth match alone preserves correlation even
-                    # when the binary block is completely different.
                     binary_kern = UnifiedL1DiscreteKernel(
                         config=[1.0] * n_binary,
                         active_dims=binary_dims,
@@ -893,37 +972,10 @@ def get_fitted_model(
                     ordinal_kern = UnifiedL1DiscreteKernel(
                         config=[max(1, c - 1) for c in ordinal_config] if ordinal_config else [1.0],
                         active_dims=ordinal_dims,
-                        # Force the GP to assign a minimum penalty to ordinal distances
+                        use_log_warp=use_log_warp,
                         lengthscale_constraint=Interval(0.01, 2.5),
-                        # lengthscale_constraint=Interval(1e-5, 2.5)
                     )
                     covar_module = ScaleKernel(binary_kern) + ScaleKernel(ordinal_kern)
-
-            # 2. MIXED DISCRETE + CONTINUOUS (Original Casmopolitan)
-            elif cat_dims and cont_dims:
-                # FIX NEW BUG A: Restore original MixtureKernel args
-                covar_module = ScaleKernel(
-                MixtureKernel(
-                    categorical_dims=cat_dims,
-                    continuous_dims=cont_dims,
-                    categorical_ard=use_ard,
-                    continuous_ard=use_ard,
-                )
-            )
-
-            # 3. PURE CONTINUOUS (Original MORBO)
-            else:
-                # FIX NEW BUG A: Restore pure continuous Matern setup
-                # FIX MINOR ISSUE: Removed local use_ard = True override
-                # FIX REMAINING BUG 1: Changed train_X to X to match function signature
-                ard_num_dims = X.shape[-1] if use_ard else 1
-                covar_module = ScaleKernel(
-                    MaternKernel(
-                        nu=2.5,
-                        ard_num_dims=ard_num_dims,
-                        lengthscale_constraint=Interval(0.05, 4.0),
-                    )
-                )
            
             likelihood = GaussianLikelihood(
                 # Relaxed from 1e-6 to prevent Cholesky failures in clustered discrete spaces

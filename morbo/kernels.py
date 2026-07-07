@@ -360,7 +360,7 @@ class UnifiedL1DiscreteKernel(Kernel):
     """
     has_lengthscale = True
 
-    def __init__(self, config, **kwargs):
+    def __init__(self, config,use_log_warp=False, **kwargs):
         if not isinstance(config, torch.Tensor):
             config = torch.tensor(config, dtype=torch.float32)
             
@@ -371,6 +371,7 @@ class UnifiedL1DiscreteKernel(Kernel):
         # lengthscale_constraint = gpytorch.constraints.Interval(0.01, 2.0)
         # kwargs.setdefault("lengthscale_constraint", lengthscale_constraint)
         kwargs.setdefault("ard_num_dims", config.shape[0])
+        self.use_log_warp = use_log_warp
         super().__init__(**kwargs)
         
        
@@ -400,47 +401,26 @@ class UnifiedL1DiscreteKernel(Kernel):
         
     #     return k.float()
 
-    
     def forward(self, x1, x2, diag=False, **params):
         ls = self.lengthscale.view(1, -1) 
-        
-        # Create masks to separate binary from ordinal operations
-        # config is 1.0 for binary, and > 1.0 (e.g., 340000) for ordinal
         is_ordinal = (self.config > 1.5).float()
         is_binary = 1.0 - is_ordinal
-        
-        if diag:
-            # Linear distance for binary
-            diff_bin_diag = torch.abs(x1 - x2) / self.config
-            
-            # Log-warped distance for ordinal
-            num_diag = torch.abs(torch.log1p(x1) - torch.log1p(x2))
-            den_diag = torch.log1p(self.config)
-            diff_ord_diag = num_diag / den_diag
-            
-            # Combine based on masks
-            diff_diag = (is_binary * diff_bin_diag) + (is_ordinal * diff_ord_diag)
-            
-            k_diag = torch.exp(-(diff_diag * ls).sum(dim=-1))
-            return k_diag.float()
 
-        # Full matrix computation
-        x1_exp = x1.unsqueeze(-2)
-        x2_exp = x2.unsqueeze(-3)
-        
-        # Linear distance for binary
-        diff_bin = torch.abs(x1_exp - x2_exp) / self.config
-        
-        # Log-warped distance for ordinal: |log(x1+1) - log(x2+1)| / log(c+1)
-        num = torch.abs(torch.log1p(x1_exp) - torch.log1p(x2_exp))
-        den = torch.log1p(self.config)
-        diff_ord = num / den
-        
-        # Combine
+        # Linear distance for binary is always applied
+        diff_bin = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / self.config
+
+        if getattr(self, "use_log_warp", True):
+            # Log-warped distance for ordinal
+            num = torch.abs(torch.log1p(x1.unsqueeze(-2)) - torch.log1p(x2.unsqueeze(-3)))
+            den = torch.log1p(self.config)
+            diff_ord = num / den
+        else:
+            # Standard L1 normalized gap for ordinal
+            diff_ord = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / self.config
+
         diff = (is_binary * diff_bin) + (is_ordinal * diff_ord)
-        
         k = torch.exp(-(diff * ls).sum(dim=-1))
-        
+
         return k.float()
 
     # def forward(self, x1, x2, diag=False, **params):
@@ -479,3 +459,41 @@ class UnifiedL1DiscreteKernel(Kernel):
     #     k = torch.exp((similarity * ls).sum(dim=-1) / ls_sum)
 
     #     return k.float()
+class DiscreteMixtureKernel(Kernel):
+    """
+    CoCaBO-style Mixture Kernel strictly for discrete spaces.
+    Mixes a binary kernel and an ordinal kernel using a learnable lambda.
+    """
+    has_lengthscale = True
+
+    def __init__(self, binary_dims, ordinal_dims, ordinal_config, use_log_warp=True, lamda=0.5, **kwargs):
+        super().__init__(**kwargs)
+        
+        # Register the learnable mixture weight
+        self.register_parameter(name='raw_lamda', parameter=torch.nn.Parameter(torch.tensor(lamda)))
+        self.register_constraint('raw_lamda', Interval(0., 1.))
+        
+        # Initialize the sub-kernels
+        self.binary_kern = UnifiedL1DiscreteKernel(
+            config=[1.0] * len(binary_dims),
+            active_dims=binary_dims,
+            **kwargs
+        )
+        
+        self.ordinal_kern = UnifiedL1DiscreteKernel(
+            config=[max(1, c - 1) for c in ordinal_config] if ordinal_config else [1.0],
+            active_dims=ordinal_dims,
+            use_log_warp=use_log_warp,
+            **kwargs
+        )
+
+    @property
+    def lamda(self):
+        return self.raw_lamda_constraint.transform(self.raw_lamda)
+
+    def forward(self, x1, x2, diag=False, **params):
+        k_bin = self.binary_kern(x1, x2, diag=diag, **params)
+        k_ord = self.ordinal_kern(x1, x2, diag=diag, **params)
+        
+        # (1 - lambda) * (K_bin + K_ord) + lambda * (K_bin * K_ord)
+        return (1.0 - self.lamda) * (k_bin + k_ord) + self.lamda * (k_bin * k_ord)

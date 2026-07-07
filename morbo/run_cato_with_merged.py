@@ -51,7 +51,7 @@ candidate_features = [k for k,v in mi.items() if v > 0]
 def evaluate_cato_batch(X_tensor):
     """
     Evaluates a batch of candidates.
-    Maps the mixed-space tensor back to the CATO domain parameters.
+    Maps the mixed-space tensor back to the CATO domain hparameters.
     MORBO/BoTorch assumes MAXIMIZATION by default. 
     We maximize F1 Score and maximize Negative Compute Cost.
     """
@@ -99,7 +99,7 @@ def evaluate_cato_batch(X_tensor):
         
     return torch.tensor(Y, dtype=X_tensor.dtype, device=X_tensor.device)
 
-def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, include_priors, damping_factor, experiment_dir=""):
+def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, include_priors, damping_factor, experiment_dir="",use_log_warp=False, use_unified_kernel = True, use_mixture_kernel = False, use_casmo_mixed_kernel = False):
     """
     Run the custom morbo+casmopolitan optimization and save matching CATO's structure.
     """
@@ -143,31 +143,32 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
     # --- 1. Define the Mixed Search Space (FIXED TO PURE DISCRETE) ---
     num_categorical = len(candidate_features)
     dim = num_categorical + 1 # +1 for pkt_depth
-    
-    # 1. EVERYTHING is categorical/ordinal now. NO continuous dimensions.
-    cat_dims = list(range(dim)) 
-    cont_dims = [] 
-    
-    # # 2. Config defines the number of choices. 
-    # # Binary variables get 2 choices (0, 1). 
-    # # pkt_depth gets max_pkt_depth + 1 choices (to safely cover integer values up to max).
-    # config = [2] * num_categorical + [max_pkt_depth+1] 
-    
-    # bounds = torch.zeros(2, dim, dtype=dtype, device=device)
-    # bounds[1, :num_categorical] = 1.0 
-    
-    # # Keep your original bounding for pkt_depth, but now the discrete sampler will handle it
-    # bounds[0, num_categorical] = 1.0
-    # bounds[1, num_categorical] = float(max_pkt_depth)
-
-    # values {0..max_pkt_depth-1} internally, shifted to {1..max_pkt_depth} in the decoder
-    config = [2] * num_categorical + [max_pkt_depth]
-    
-    bounds = torch.zeros(2, dim, dtype=dtype, device=device)
-    bounds[1, :num_categorical] = 1.0
-    bounds[0, num_categorical] = 0.0                        # internal min = 0
-    bounds[1, num_categorical] = float(max_pkt_depth - 1)  # internal max = max_pkt_depth-1
-    
+    if use_casmo_mixed_kernel:
+        # THE ORIGINAL CASMOPOLITAN PATH
+        cat_dims = list(range(num_categorical))
+        cont_dims = [num_categorical]
+        binary_dims = list(range(num_categorical))
+        ordinal_dims = []
+        ordinal_config = []
+        config = [2] * num_categorical + [0] # 0 denotes a continuous dimension
+        
+        bounds = torch.zeros(2, dim, dtype=dtype, device=device)
+        bounds[1, :num_categorical] = 1.0
+        bounds[0, num_categorical] = 0.0
+        bounds[1, num_categorical] = float(max_pkt_depth - 1)
+    else:
+        # THE PURE DISCRETE PATH (Your custom architectures)
+        cat_dims = list(range(dim)) 
+        cont_dims = [] 
+        binary_dims = list(range(num_categorical))
+        ordinal_dims = [num_categorical]
+        ordinal_config = [max_pkt_depth]
+        config = [2] * num_categorical + [max_pkt_depth]
+        
+        bounds = torch.zeros(2, dim, dtype=dtype, device=device)
+        bounds[1, :num_categorical] = 1.0
+        bounds[0, num_categorical] = 0.0                        
+        bounds[1, num_categorical] = float(max_pkt_depth - 1)
 
     # max_ref_point = [0.0, -1000.0] 
     max_ref_point = [0.0, -20.0] 
@@ -197,10 +198,19 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
         length_init_discrete=max(1, num_categorical // 2),
         length_max_discrete=num_categorical,
 
-        # ADD THESE THREE LINES:
-        binary_dims=list(range(num_categorical)),
-        ordinal_dims=[num_categorical],
-        ordinal_config=[max_pkt_depth],
+        # # ADD THESE THREE LINES:
+        # binary_dims=list(range(num_categorical)),
+        # ordinal_dims=[num_categorical],
+        # ordinal_config=[max_pkt_depth],
+        # --- THE FIX: Pass the dynamically computed locals ---
+        binary_dims=binary_dims,
+        ordinal_dims=ordinal_dims,
+        ordinal_config=ordinal_config,
+        # Ensure your other ablation flags are also passed down from the runner args!
+        use_log_warp=use_log_warp,
+        use_unified_kernel=use_unified_kernel,
+        use_mixture_kernel=use_mixture_kernel,
+        use_casmo_mixed_kernel=use_casmo_mixed_kernel
     )
 
     trbo_state = TRBOState(
@@ -246,11 +256,24 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
     # This replaces the log-warp so the initial points are uniformly distributed 
     # across the entire 0 to 349,999 range.
     max_val = max_pkt_depth - 1
-    X_init[:, num_categorical] = torch.round(raw_sobol[:, num_categorical] * float(max_val))
+    # X_init[:, num_categorical] = torch.round(raw_sobol[:, num_categorical] * float(max_val))
     
     # Ensure strict bounds
-    X_init[:, num_categorical] = torch.clamp(X_init[:, num_categorical], 0.0, float(max_val))
+    # X_init[:, num_categorical] = torch.clamp(X_init[:, num_categorical], 0.0, float(max_val))
 
+    # 2. Ordinal Packet Depth Toggle
+    max_val = max_pkt_depth - 1
+    if tr_hparams.use_log_warp:
+        # Log-warped initialization (Biased towards 0)
+        import math as _math
+        X_init[:, num_categorical] = torch.round(
+            torch.exp(raw_sobol[:, num_categorical] * _math.log(max_val + 1)) - 1
+        )
+    else:
+        # Standard Linear Initialization (Uniform over 0 to 3.5 lacs)
+        X_init[:, num_categorical] = torch.round(raw_sobol[:, num_categorical] * float(max_val))
+    
+    X_init[:, num_categorical] = torch.clamp(X_init[:, num_categorical], 0.0, float(max_val))
     Y_init = evaluate_cato_batch(X_init)
     
     trbo_state.update(X=X_init, Y=Y_init, new_ind=torch.full((X_init.shape[0],), 0, dtype=torch.long, device=device))
@@ -371,7 +394,11 @@ def main(args):
                             int(num_iter) - int(num_init), 
                             args.priors,
                             float(damping_factor), 
-                            experiment_dir=args.experiment_dir
+                            experiment_dir=args.experiment_dir,
+                            use_log_warp=False, 
+                            use_unified_kernel = True, 
+                            use_mixture_kernel = False, 
+                            use_casmo_mixed_kernel = False
                         )
 
 if __name__ == "__main__":
@@ -380,8 +407,11 @@ if __name__ == "__main__":
     parser.add_argument("num_init", type=str, help="Comma separated list of Number of initial samples to query")
     parser.add_argument("num_iter", type=str, help="Comma separated list of Number of BO iterations")
     parser.add_argument("damping_factor", type=str, help="Comma separated list of Dampen feature priors. 0 = no damping, 1 = no prior")
+    parser.add_argument("--mixture_kernel", action="store_true", help="Use lambda-weighted mixture kernel")
     parser.add_argument("experiment_dir", type=str, help="Path to experiment output dir")
+    parser.add_argument("--unified_kernel", action="store_true", help="Use a single kernel for binary and ordinal dims")
     parser.add_argument("--num_trials", type=int, default=1, help="Number of trials")
     parser.add_argument("--priors", action="store_true", help="Include priors")
+
     parser.set_defaults(priors=True)
     main(parser.parse_args())

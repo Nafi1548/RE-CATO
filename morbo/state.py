@@ -802,6 +802,7 @@ class TRBOState(Module):
         binary_dims = getattr(self.tr_hparams, "binary_dims", None)
         ordinal_dims = getattr(self.tr_hparams, "ordinal_dims", None)
         ordinal_config = getattr(self.tr_hparams, "ordinal_config", None)
+        use_log_warp = getattr(self.tr_hparams, "use_log_warp", False)
 
         if cont_indices is not None and len(cont_indices) == 0:
             intf = None
@@ -832,6 +833,10 @@ class TRBOState(Module):
             binary_dims=self.tr_hparams.binary_dims,
             ordinal_dims=self.tr_hparams.ordinal_dims,
             ordinal_config=self.tr_hparams.ordinal_config,
+            use_log_warp=self.tr_hparams.use_log_warp,
+            use_unified_kernel=self.tr_hparams.use_unified_kernel,
+            use_mixture_kernel=self.tr_hparams.use_mixture_kernel,
+
         )
 
         # optimize a HV scalarization
@@ -943,6 +948,7 @@ class TRBOState(Module):
                 max_hamming_dist=len(cat_dims),
                 n_restart=3,
                 batch_size=1,
+                use_log_warp=use_log_warp,
             )
             best_cand = torch.tensor(best_x_np[0], dtype=self.ref_point.dtype, device=self.ref_point.device).unsqueeze(0)
             
