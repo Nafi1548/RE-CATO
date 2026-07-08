@@ -762,6 +762,7 @@ def get_fitted_model(
     use_mixture_kernel: bool = False,
     use_casmo_mixed_kernel: bool = False,
 ) -> Model:
+    # --- ADD THESE TWO LINES AT THE VERY TOP ---
     print("Fitting a model")
     use_fast_mvms = True if X.shape[0] > max_cholesky_size else False
     with gpytorch_settings.fast_computations(
@@ -770,6 +771,8 @@ def get_fitted_model(
         solves=use_fast_mvms,
     ):
         
+        X = X.to(dtype=torch.float64)
+        Y = Y.to(dtype=torch.float64)
         # --- ADD THIS BLOCK: Strip discrete duplicates ---
         # Convert to numpy to easily find unique rows, then re-apply to tensors
         X_np = X.cpu().numpy()
@@ -934,7 +937,7 @@ def get_fitted_model(
                             lengthscale_constraint=Interval(0.01, 2.5),
                         )
                         covar_module = ScaleKernel(binary_kern) + ScaleKernel(ordinal_kern)
-                        
+
                 # PATH A: Mixture Kernel (Learnable Lambda)
                 if use_mixture_kernel:
                     covar_module = ScaleKernel(
@@ -1028,6 +1031,7 @@ def get_fitted_model(
 
     if X.is_cuda:
         print(f"after fitting: {torch.cuda.memory_allocated(X.device) / (1000 ** 3)}")
+    model = model.to(dtype=torch.float64)
     return model
 
 

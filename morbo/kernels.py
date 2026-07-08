@@ -402,26 +402,29 @@ class UnifiedL1DiscreteKernel(Kernel):
     #     return k.float()
 
     def forward(self, x1, x2, diag=False, **params):
-        ls = self.lengthscale.view(1, -1) 
-        is_ordinal = (self.config > 1.5).float()
+        target_dtype = x1.dtype
+        config = self.config.to(target_dtype)
+        ls = self.lengthscale.view(1, -1).to(target_dtype) 
+        
+        is_ordinal = (config > 1.5).to(target_dtype)
         is_binary = 1.0 - is_ordinal
-
-        # Linear distance for binary is always applied
-        diff_bin = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / self.config
-
-        if getattr(self, "use_log_warp", True):
-            # Log-warped distance for ordinal
+        
+        diff_bin = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / config
+        
+        if self.use_log_warp:
             num = torch.abs(torch.log1p(x1.unsqueeze(-2)) - torch.log1p(x2.unsqueeze(-3)))
-            den = torch.log1p(self.config)
+            den = torch.log1p(config)
             diff_ord = num / den
         else:
-            # Standard L1 normalized gap for ordinal
-            diff_ord = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / self.config
-
+            diff_ord = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / config
+            
         diff = (is_binary * diff_bin) + (is_ordinal * diff_ord)
         k = torch.exp(-(diff * ls).sum(dim=-1))
-
-        return k.float()
+        
+        out = k.to(target_dtype)
+        # Uncomment the line below if you want to see every single sub-kernel call
+        # print(f"[DEBUG L1] -> Internal L1 Output dtype: {out.dtype}")
+        return out
 
     # def forward(self, x1, x2, diag=False, **params):
     #     # FIX 2: Safely flatten lengthscale for broadcasting (handles ARD and non-ARD)
@@ -459,21 +462,75 @@ class UnifiedL1DiscreteKernel(Kernel):
     #     k = torch.exp((similarity * ls).sum(dim=-1) / ls_sum)
 
     #     return k.float()
+# class DiscreteMixtureKernel(Kernel):
+#     """
+#     CoCaBO-style Mixture Kernel strictly for discrete spaces.
+#     Mixes a binary kernel and an ordinal kernel using a learnable lambda.
+#     """
+#     has_lengthscale = True
+
+#     def __init__(self, binary_dims, ordinal_dims, ordinal_config, use_log_warp=True, lamda=0.5, **kwargs):
+#         super().__init__(**kwargs)
+        
+#         # Register the learnable mixture weight
+#         # self.register_parameter(name='raw_lamda', parameter=torch.nn.Parameter(torch.tensor(lamda)))
+#         # self.register_constraint('raw_lamda', Interval(0., 1.))
+#         # FIX 1: Initialize the learnable parameter and constraints explicitly as float64
+#         self.register_parameter(
+#             name='raw_lamda', 
+#             parameter=torch.nn.Parameter(torch.tensor(lamda, dtype=torch.float64))
+#         )
+#         self.register_constraint(
+#             'raw_lamda', 
+#             Interval(torch.tensor(0.0, dtype=torch.float64), torch.tensor(1.0, dtype=torch.float64))
+#         )
+#         # Initialize the sub-kernels
+#         self.binary_kern = UnifiedL1DiscreteKernel(
+#             config=[1.0] * len(binary_dims),
+#             active_dims=binary_dims,
+#             **kwargs
+#         )
+        
+#         self.ordinal_kern = UnifiedL1DiscreteKernel(
+#             config=[max(1, c - 1) for c in ordinal_config] if ordinal_config else [1.0],
+#             active_dims=ordinal_dims,
+#             use_log_warp=use_log_warp,
+#             **kwargs
+#         )
+
+#     @property
+#     def lamda(self):
+#         return self.raw_lamda_constraint.transform(self.raw_lamda)
+
+#     def forward(self, x1, x2, diag=False, **params):
+#         k_bin = self.binary_kern(x1, x2, diag=diag, **params)
+#         k_ord = self.ordinal_kern(x1, x2, diag=diag, **params)
+#         # FIX 2: Strictly align the mixture parameter with the input data type
+#         current_dtype = x1.dtype
+#         current_device = x1.device
+        
+#         lmd = self.lamda.to(dtype=current_dtype, device=current_device)
+#         one = torch.tensor(1.0, dtype=current_dtype, device=current_device)
+        
+#         # The equation now uses precision-matched scalars
+#         return (one - lmd) * (k_bin + k_ord) + lmd * (k_bin * k_ord)
+
 class DiscreteMixtureKernel(Kernel):
-    """
-    CoCaBO-style Mixture Kernel strictly for discrete spaces.
-    Mixes a binary kernel and an ordinal kernel using a learnable lambda.
-    """
     has_lengthscale = True
 
     def __init__(self, binary_dims, ordinal_dims, ordinal_config, use_log_warp=True, lamda=0.5, **kwargs):
         super().__init__(**kwargs)
         
-        # Register the learnable mixture weight
-        self.register_parameter(name='raw_lamda', parameter=torch.nn.Parameter(torch.tensor(lamda)))
-        self.register_constraint('raw_lamda', Interval(0., 1.))
+        # Initialize as float64
+        self.register_parameter(
+            name='raw_lamda', 
+            parameter=torch.nn.Parameter(torch.tensor(lamda, dtype=torch.float64))
+        )
+        self.register_constraint(
+            'raw_lamda', 
+            Interval(torch.tensor(0.0, dtype=torch.float64), torch.tensor(1.0, dtype=torch.float64))
+        )
         
-        # Initialize the sub-kernels
         self.binary_kern = UnifiedL1DiscreteKernel(
             config=[1.0] * len(binary_dims),
             active_dims=binary_dims,
@@ -492,8 +549,20 @@ class DiscreteMixtureKernel(Kernel):
         return self.raw_lamda_constraint.transform(self.raw_lamda)
 
     def forward(self, x1, x2, diag=False, **params):
+        print(f"\n[DEBUG MIXTURE] -> Input x1 dtype: {x1.dtype}")
+        
         k_bin = self.binary_kern(x1, x2, diag=diag, **params)
         k_ord = self.ordinal_kern(x1, x2, diag=diag, **params)
         
-        # (1 - lambda) * (K_bin + K_ord) + lambda * (K_bin * K_ord)
-        return (1.0 - self.lamda) * (k_bin + k_ord) + self.lamda * (k_bin * k_ord)
+        print(f"[DEBUG MIXTURE] -> k_bin dtype: {k_bin.dtype} | k_ord dtype: {k_ord.dtype}")
+        
+        target_dtype = k_bin.dtype
+        lmd = self.lamda.to(dtype=target_dtype)
+        one = torch.tensor(1.0, dtype=target_dtype, device=x1.device)
+        
+        print(f"[DEBUG MIXTURE] -> lambda dtype: {lmd.dtype} | one dtype: {one.dtype}")
+        
+        out = (one - lmd) * (k_bin + k_ord) + lmd * (k_bin * k_ord)
+        print(f"[DEBUG MIXTURE] -> Final Output dtype: {out.dtype}\n")
+        
+        return out

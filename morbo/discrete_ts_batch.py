@@ -336,6 +336,15 @@ def discrete_ts_batch_select(trbo_state: TRBOState) -> CandidateSelectionOutput:
             #     ts_sample = posterior.sample().squeeze(0)  # Shape: (N_pool, M)
             
             with torch.no_grad(), gpytorch.settings.max_cholesky_size(float("inf")):
+                print(f"\n[DEBUG TS BATCH] -> pool_X dtype: {pool_X.dtype}")
+                print(f"[DEBUG TS BATCH] -> model_j.train_inputs[0] dtype: {model_j.train_inputs[0].dtype}")
+                print(f"[DEBUG TS BATCH] -> model_j.train_targets dtype: {model_j.train_targets.dtype}")
+                
+                # Check the ScaleKernel and Mean Module
+                if hasattr(model_j, 'covar_module') and hasattr(model_j.covar_module, 'outputscale'):
+                    print(f"[DEBUG TS BATCH] -> ScaleKernel outputscale dtype: {model_j.covar_module.outputscale.dtype}")
+                if hasattr(model_j, 'mean_module') and hasattr(model_j.mean_module, 'constant'):
+                    print(f"[DEBUG TS BATCH] -> MeanModule constant dtype: {model_j.mean_module.constant.dtype}")
                 posterior = model_j.posterior(pool_X)
                 ts_sample = posterior.sample(torch.Size([1])).squeeze(0)   # (N_pool, M)
 
