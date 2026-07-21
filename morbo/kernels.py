@@ -112,71 +112,111 @@ class MixtureKernel(Kernel):
             else:
                 self.fixed_lamda = value
 
+    # def forward(self, x1, x2, diag=False,
+    #             x1_cont=None, x2_cont=None, **params):
+    #     """
+    #     Note that here I also give options to pass the categorical and continuous inputs separately (instead of jointly)
+    #     because the categorical dimensions will not be differentiable, and thus there would be problems when we optimize
+    #     the acquisition function.
+
+    #     When passed separately, x1 and x2 refer the categorical (non-differentiable) data, whereas x1_cont and x2_cont
+    #     are the continuous (differentiable) data.
+    #     Parameters
+    #     ----------
+    #     x1
+    #     x2
+    #     diag
+    #     x1_cont
+    #     x2_cont
+    #     params
+
+    #     Returns
+    #     -------
+
+    #     """
+    #     if x1_cont is None and x2_cont is None:
+    #         assert x1.shape[1] == len(self.categorical_dims) + len(self.continuous_dims), \
+    #             'dimension mismatch. Expected number of dimensions %d but got %d in x1' % \
+    #             (len(self.categorical_dims) + len(self.continuous_dims), x1.shape[1])
+    #         x1_cont, x2_cont = x1[:, self.continuous_dims], x2[:, self.continuous_dims]
+    #         # the categorical kernels are not differentiable w.r.t inputs, detach them to ensure the computing graph of
+    #         # the autodiff engine is not broken.
+    #         x1_cat, x2_cat = x1[:, self.categorical_dims].detach(), x2[:, self.categorical_dims].detach()
+    #     # else:
+    #     #     assert x1.shape[1] == len(self.categorical_dims)
+    #     #     assert x1_cont.shape[1] == len(self.continuous_dims)
+    #     #     x1_cat, x2_cat = x1, x2
+    #     # # same in cocabo.
+    #     # return (1. - self.lamda) * (self.categorical_kern.forward(x1_cat, x2_cat, diag, **params) +
+    #     #                             self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)) + \
+    #     #        self.lamda * self.categorical_kern.forward(x1_cat, x2_cat, diag, **params) * \
+    #     #        self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)
+    #     else:
+    #         assert x1.shape[1] == len(self.categorical_dims)
+    #         assert x1_cont.shape[1] == len(self.continuous_dims)
+    #         x1_cat, x2_cat = x1, x2
+            
+    #     # --- FIX FOR PURELY CATEGORICAL OR PURELY CONTINUOUS SPACES ---
+    #     if x1_cont.shape[1] == 0:
+    #         return self.categorical_kern.forward(x1_cat, x2_cat, diag, **params)
+    #     if x1_cat.shape[1] == 0:
+    #         return self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)
+    #     # --------------------------------------------------------------
+
+    #     # same in cocabo.
+    #     return (1. - self.lamda) * (self.categorical_kern.forward(x1_cat, x2_cat, diag, **params) +
+    #                                 self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)) + \
+    #            self.lamda * self.categorical_kern.forward(x1_cat, x2_cat, diag, **params) * \
+    #            self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)
+
+
     def forward(self, x1, x2, diag=False,
                 x1_cont=None, x2_cont=None, **params):
-        """
-        Note that here I also give options to pass the categorical and continuous inputs separately (instead of jointly)
-        because the categorical dimensions will not be differentiable, and thus there would be problems when we optimize
-        the acquisition function.
-
-        When passed separately, x1 and x2 refer the categorical (non-differentiable) data, whereas x1_cont and x2_cont
-        are the continuous (differentiable) data.
-        Parameters
-        ----------
-        x1
-        x2
-        diag
-        x1_cont
-        x2_cont
-        params
-
-        Returns
-        -------
-
-        """
+        
         if x1_cont is None and x2_cont is None:
-            assert x1.shape[1] == len(self.categorical_dims) + len(self.continuous_dims), \
+            # FIX: Use x1.shape[-1] to check the actual feature dimension
+            assert x1.shape[-1] == len(self.categorical_dims) + len(self.continuous_dims), \
                 'dimension mismatch. Expected number of dimensions %d but got %d in x1' % \
-                (len(self.categorical_dims) + len(self.continuous_dims), x1.shape[1])
-            x1_cont, x2_cont = x1[:, self.continuous_dims], x2[:, self.continuous_dims]
-            # the categorical kernels are not differentiable w.r.t inputs, detach them to ensure the computing graph of
-            # the autodiff engine is not broken.
-            x1_cat, x2_cat = x1[:, self.categorical_dims].detach(), x2[:, self.categorical_dims].detach()
-        # else:
-        #     assert x1.shape[1] == len(self.categorical_dims)
-        #     assert x1_cont.shape[1] == len(self.continuous_dims)
-        #     x1_cat, x2_cat = x1, x2
-        # # same in cocabo.
-        # return (1. - self.lamda) * (self.categorical_kern.forward(x1_cat, x2_cat, diag, **params) +
-        #                             self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)) + \
-        #        self.lamda * self.categorical_kern.forward(x1_cat, x2_cat, diag, **params) * \
-        #        self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)
+                (len(self.categorical_dims) + len(self.continuous_dims), x1.shape[-1])
+                
+            # FIX: Use Ellipsis (...) to preserve all GPyTorch batch dimensions
+            x1_cont, x2_cont = x1[..., self.continuous_dims], x2[..., self.continuous_dims]
+            x1_cat, x2_cat = x1[..., self.categorical_dims].detach(), x2[..., self.categorical_dims].detach()
         else:
-            assert x1.shape[1] == len(self.categorical_dims)
-            assert x1_cont.shape[1] == len(self.continuous_dims)
+            assert x1.shape[-1] == len(self.categorical_dims)
+            assert x1_cont.shape[-1] == len(self.continuous_dims)
             x1_cat, x2_cat = x1, x2
             
-        # --- FIX FOR PURELY CATEGORICAL OR PURELY CONTINUOUS SPACES ---
-        if x1_cont.shape[1] == 0:
+        if x1_cont.shape[-1] == 0:
             return self.categorical_kern.forward(x1_cat, x2_cat, diag, **params)
-        if x1_cat.shape[1] == 0:
+        if x1_cat.shape[-1] == 0:
             return self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)
-        # --------------------------------------------------------------
 
-        # same in cocabo.
         return (1. - self.lamda) * (self.categorical_kern.forward(x1_cat, x2_cat, diag, **params) +
                                     self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)) + \
                self.lamda * self.categorical_kern.forward(x1_cat, x2_cat, diag, **params) * \
                self.continuous_kern.forward(x1_cont, x2_cont, diag, **params)
+    
 
-
+# def wrap(x1, x2, integer_dims):
+#     """The wrapping transformation for integer dimensions according to Garrido-Merchán and Hernández-Lobato (2020)."""
+#     if integer_dims is not None:
+#         for i in integer_dims:
+#             x1[:, i] = torch.round(x1[:, i])
+#             x2[:, i] = torch.round(x2[:, i])
+#     return x1, x2
 def wrap(x1, x2, integer_dims):
     """The wrapping transformation for integer dimensions according to Garrido-Merchán and Hernández-Lobato (2020)."""
     if integer_dims is not None:
         for i in integer_dims:
-            x1[:, i] = torch.round(x1[:, i])
-            x2[:, i] = torch.round(x2[:, i])
-    return x1, x2
+            # # FIX: Use Ellipsis to support batched rounding
+            # x1[..., i] = torch.round(x1[..., i])
+            x1_cloned = x1.clone()
+            x1_cloned[..., i] = torch.round(x1[..., i])
+            # x2[..., i] = torch.round(x2[..., i])
+            x2_cloned = x2.clone()
+            x2_cloned[..., i] = torch.round(x2[..., i])
+    return x1_cloned, x2_cloned
 
 
 class WrappedMatern(MaternKernel):
@@ -209,46 +249,100 @@ class WrappedRBF(RBFKernel, WrappedMatern):
         return super().forward(x1, x2, diag=diag, **params)
 
 
-class CategoricalOverlap(Kernel):
-    """Implementation of the categorical overlap kernel.
-    This is the most basic form of the categorical kernel that essentially invokes a Kronecker delta function
-    between any two elements.
-    """
+# class CategoricalOverlap(Kernel):
+#     """Implementation of the categorical overlap kernel.
+#     This is the most basic form of the categorical kernel that essentially invokes a Kronecker delta function
+#     between any two elements.
+#     """
 
+#     has_lengthscale = True
+#     def __init__(self, **kwargs):
+#         super(CategoricalOverlap, self).__init__(has_lengthscale=True, **kwargs)
+
+#     def forward(self, x1, x2, diag=False, last_dim_is_batch=False, **params):
+#         # First, convert one-hot to ordinal representation
+
+#         diff = x1[:, None] - x2[None, :]
+#         # nonzero location = different cat
+#         diff[torch.abs(diff) > 1e-5] = 1
+#         # invert, to now count same cats
+#         diff1 = torch.logical_not(diff).float()
+#         if self.ard_num_dims is not None and self.ard_num_dims > 1:
+#             k_cat = torch.sum(self.lengthscale * diff1, dim=-1) / torch.sum(self.lengthscale)
+#         else:
+#             # dividing by number of cat variables to keep this term in range [0,1]
+#             k_cat = torch.sum(diff1, dim=-1) / x1.shape[1]
+#         if diag:
+#             return torch.diag(k_cat).float()
+#         return k_cat.float()
+
+
+# class TransformedCategorical(CategoricalOverlap):
+#     """
+#     Second kind of transformed kernel of form:
+#     $$ k(x, x') = \exp(\frac{\lambda}{n}) \sum_{i=1}^n [x_i = x'_i] )$$ (if non-ARD)
+#     or
+#     $$ k(x, x') = \exp(\frac{1}{n} \sum_{i=1}^n \lambda_i [x_i = x'_i]) $$ if ARD
+#     """
+
+#     has_lengthscale = True
+
+#     def forward(self, x1, x2, diag=False, last_dim_is_batch=False, exp='rbf', **params):
+#         diff = x1[:, None] - x2[None, :]
+#         diff[torch.abs(diff) > 1e-5] = 1
+#         diff1 = torch.logical_not(diff).float()
+
+#         def rbf(d, ard):
+#             if ard:
+#                 return torch.exp(torch.sum(d * self.lengthscale, dim=-1) / torch.sum(self.lengthscale))
+#             else:
+#                 return torch.exp(self.lengthscale * torch.sum(d, dim=-1) / x1.shape[1])
+
+#         def mat52(d, ard):
+#             raise NotImplementedError
+
+#         if exp == 'rbf':
+#             k_cat = rbf(diff1, self.ard_num_dims is not None and self.ard_num_dims > 1)
+#         elif exp == 'mat52':
+#             k_cat = mat52(diff1, self.ard_num_dims is not None and self.ard_num_dims > 1)
+#         else:
+#             raise ValueError('Exponentiation scheme %s is not recognised!' % exp)
+#         if diag:
+#             return torch.diag(k_cat).float()
+#         return k_cat.float()
+class CategoricalOverlap(Kernel):
     has_lengthscale = True
     def __init__(self, **kwargs):
         super(CategoricalOverlap, self).__init__(has_lengthscale=True, **kwargs)
 
     def forward(self, x1, x2, diag=False, last_dim_is_batch=False, **params):
-        # First, convert one-hot to ordinal representation
-
-        diff = x1[:, None] - x2[None, :]
-        # nonzero location = different cat
+        if diag:
+            diff = x1 - x2
+        else:
+            # FIX: Safely expand dimensions from the right for batching
+            diff = x1.unsqueeze(-2) - x2.unsqueeze(-3)
+            
         diff[torch.abs(diff) > 1e-5] = 1
-        # invert, to now count same cats
         diff1 = torch.logical_not(diff).float()
+        
         if self.ard_num_dims is not None and self.ard_num_dims > 1:
             k_cat = torch.sum(self.lengthscale * diff1, dim=-1) / torch.sum(self.lengthscale)
         else:
-            # dividing by number of cat variables to keep this term in range [0,1]
-            k_cat = torch.sum(diff1, dim=-1) / x1.shape[1]
-        if diag:
-            return torch.diag(k_cat).float()
+            # FIX: Use shape[-1] instead of shape[1]
+            k_cat = torch.sum(diff1, dim=-1) / x1.shape[-1]
+            
         return k_cat.float()
 
 
 class TransformedCategorical(CategoricalOverlap):
-    """
-    Second kind of transformed kernel of form:
-    $$ k(x, x') = \exp(\frac{\lambda}{n}) \sum_{i=1}^n [x_i = x'_i] )$$ (if non-ARD)
-    or
-    $$ k(x, x') = \exp(\frac{1}{n} \sum_{i=1}^n \lambda_i [x_i = x'_i]) $$ if ARD
-    """
-
     has_lengthscale = True
 
     def forward(self, x1, x2, diag=False, last_dim_is_batch=False, exp='rbf', **params):
-        diff = x1[:, None] - x2[None, :]
+        if diag:
+            diff = x1 - x2
+        else:
+            diff = x1.unsqueeze(-2) - x2.unsqueeze(-3)
+            
         diff[torch.abs(diff) > 1e-5] = 1
         diff1 = torch.logical_not(diff).float()
 
@@ -256,7 +350,7 @@ class TransformedCategorical(CategoricalOverlap):
             if ard:
                 return torch.exp(torch.sum(d * self.lengthscale, dim=-1) / torch.sum(self.lengthscale))
             else:
-                return torch.exp(self.lengthscale * torch.sum(d, dim=-1) / x1.shape[1])
+                return torch.exp(self.lengthscale * torch.sum(d, dim=-1) / x1.shape[-1])
 
         def mat52(d, ard):
             raise NotImplementedError
@@ -267,10 +361,8 @@ class TransformedCategorical(CategoricalOverlap):
             k_cat = mat52(diff1, self.ard_num_dims is not None and self.ard_num_dims > 1)
         else:
             raise ValueError('Exponentiation scheme %s is not recognised!' % exp)
-        if diag:
-            return torch.diag(k_cat).float()
+            
         return k_cat.float()
-
 
 class OrdinalKernel(Kernel):
     """

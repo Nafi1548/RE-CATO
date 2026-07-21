@@ -71,6 +71,7 @@ def execute_combined_pipeline(args):
             morbo_casmo_run(
                 candidate_features=candidate_features, 
                 max_pkt_depth=max_pkt, 
+                num_init=10,                  # <--- ADD THIS LINE
                 csv_init_path=cato_csv_path,  # Automated handoff!
                 num_iter=args.morbo_iters,    # Remaining budget
                 include_priors=args.priors,
@@ -79,7 +80,8 @@ def execute_combined_pipeline(args):
                 use_log_warp=False, 
                 use_unified_kernel=False, 
                 use_mixture_kernel=True, 
-                use_casmo_mixed_kernel=False
+                use_casmo_mixed_kernel=False,
+                # csv_init_path=None
             )
             
             print(f"\n=== PIPELINE COMPLETE FOR MAX DEPTH {max_pkt} ===")

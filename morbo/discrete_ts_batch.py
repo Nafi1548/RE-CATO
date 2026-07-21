@@ -232,7 +232,8 @@ def generate_chebyshev_pool(trbo_state, tr, model, n_restarts=5, step=150, inter
             length_discrete=length_discrete,
             binary_dims=binary_dims,
             ordinal_dims=ordinal_dims,
-            ordinal_config=ordinal_config
+            ordinal_config=ordinal_config,
+            use_log_warp=use_log_warp
         ).to(**tkwargs)
     
     # ---------------------------------------------------------
@@ -290,10 +291,26 @@ def discrete_ts_batch_select(trbo_state: TRBOState) -> CandidateSelectionOutput:
     batch_size = trbo_state.tr_hparams.batch_size
     n_trs = len(trbo_state.trust_regions)
     objective = trbo_state.trust_regions[0].objective
-    ref_point = trbo_state.ref_point.clone().to(**tkwargs)
+    # ref_point = trbo_state.ref_point.clone().to(**tkwargs)
+    # --- BULLETPROOF REFERENCE POINT FALLBACK ---
+    if getattr(trbo_state, 'ref_point', None) is not None:
+        ref_point = trbo_state.ref_point.clone().to(**tkwargs)
+    else:
+        # Fallback to the configured maximum boundary
+        ref_point = torch.tensor(trbo_state.tr_hparams.max_reference_point, **tkwargs)
+        # Patch the state so downstream trust regions don't crash!
+        trbo_state.ref_point = ref_point
+    # --------------------------------------------
     
     fantasy_models = [trbo_state.models[j] for j in range(n_trs)]
-    current_pareto_Y = objective(trbo_state.pareto_Y_better_than_ref.clone().to(**tkwargs))
+    # current_pareto_Y = objective(trbo_state.pareto_Y_better_than_ref.clone().to(**tkwargs))
+    # --- BULLETPROOF PARETO Y FALLBACK ---
+    if getattr(trbo_state, 'pareto_Y_better_than_ref', None) is not None:
+        current_pareto_Y = objective(trbo_state.pareto_Y_better_than_ref.clone().to(**tkwargs))
+    else:
+        # If no points beat the reference yet, start with an empty Pareto front
+        current_pareto_Y = torch.empty((0, trbo_state.num_objectives), **tkwargs)
+    # -------------------------------------
 
     X_next = torch.empty(0, trbo_state.dim, **tkwargs)
     tr_indices_selected = torch.zeros(batch_size, device=tkwargs["device"], dtype=torch.long)
@@ -336,24 +353,81 @@ def discrete_ts_batch_select(trbo_state: TRBOState) -> CandidateSelectionOutput:
             #     ts_sample = posterior.sample().squeeze(0)  # Shape: (N_pool, M)
             
             with torch.no_grad(), gpytorch.settings.max_cholesky_size(float("inf")):
-                print(f"\n[DEBUG TS BATCH] -> pool_X dtype: {pool_X.dtype}")
-                print(f"[DEBUG TS BATCH] -> model_j.train_inputs[0] dtype: {model_j.train_inputs[0].dtype}")
-                print(f"[DEBUG TS BATCH] -> model_j.train_targets dtype: {model_j.train_targets.dtype}")
+                # print(f"\n[DEBUG TS BATCH] -> pool_X dtype: {pool_X.dtype}")
+                # print(f"[DEBUG TS BATCH] -> model_j.train_inputs[0] dtype: {model_j.train_inputs[0].dtype}")
+                # print(f"[DEBUG TS BATCH] -> model_j.train_targets dtype: {model_j.train_targets.dtype}")
                 
-                # Check the ScaleKernel and Mean Module
-                if hasattr(model_j, 'covar_module') and hasattr(model_j.covar_module, 'outputscale'):
-                    print(f"[DEBUG TS BATCH] -> ScaleKernel outputscale dtype: {model_j.covar_module.outputscale.dtype}")
-                if hasattr(model_j, 'mean_module') and hasattr(model_j.mean_module, 'constant'):
-                    print(f"[DEBUG TS BATCH] -> MeanModule constant dtype: {model_j.mean_module.constant.dtype}")
+                # # Check the ScaleKernel and Mean Module
+                # if hasattr(model_j, 'covar_module') and hasattr(model_j.covar_module, 'outputscale'):
+                #     print(f"[DEBUG TS BATCH] -> ScaleKernel outputscale dtype: {model_j.covar_module.outputscale.dtype}")
+                # if hasattr(model_j, 'mean_module') and hasattr(model_j.mean_module, 'constant'):
+                #     print(f"[DEBUG TS BATCH] -> MeanModule constant dtype: {model_j.mean_module.constant.dtype}")
                 posterior = model_j.posterior(pool_X)
-                ts_sample = posterior.sample(torch.Size([1])).squeeze(0)   # (N_pool, M)
+            #     # Sample from the posterior
+                
+            #     ts_sample = posterior.sample(torch.Size([1]))
+                
+            #     # --- AGGRESSIVE BATCHED MULTI-OBJECTIVE FIX ---
+            #     # 1. Strip away all extra leading singleton dimensions (e.g., from (1, 2, 1016) to (2, 1016))
+            #     while ts_sample.dim() > 2 and ts_sample.shape[0] == 1:
+            #         ts_sample = ts_sample.squeeze(0)
+                
+            #     # 2. Get the exact number of objectives from the reference point (bulletproof)
+            #     n_objs = ref_point.shape[-1]
+                
+            #     # 3. Transpose if the shape is (Num_Objectives, Num_Candidates) -> (2, 1016) becomes (1016, 2)
+            #     if ts_sample.dim() == 2 and ts_sample.shape[0] == n_objs:
+            #         ts_sample = ts_sample.transpose(0, 1)
+                
+            #     # Apply the objective function
+            #     ts_obj = objective(ts_sample)
+                
+            #     # 4. Bulletproof the output (just in case the objective function transposed it back)
+            #     while ts_obj.dim() > 2 and ts_obj.shape[0] == 1:
+            #         ts_obj = ts_obj.squeeze(0)
+            #     if ts_obj.dim() == 2 and ts_obj.shape[0] == n_objs:
+            #         ts_obj = ts_obj.transpose(0, 1)
+            #     # ----------------------------------------------
 
-            ts_obj = objective(ts_sample)
 
-
-            # --- ONE SHOT CALL: Score the entire pool instantly ---
-            scores = _marginal_hvi_scores(ts_obj, current_pareto_Y, ref_point, baseline_hv)
+            # # --- ONE SHOT CALL: Score the entire pool instantly ---
+            # scores = _marginal_hvi_scores(ts_obj, current_pareto_Y, ref_point, baseline_hv)
+            N_pool = pool_X.shape[0]
+            n_objs = ref_point.numel()
+            # Sample from the posterior
+            ts_sample = posterior.sample(torch.Size([1]))
             
+            # 1. Strip extra singleton dimensions (e.g., from (1, 1017, 2) to (1017, 2))
+            while ts_sample.dim() > 2 and ts_sample.shape[0] == 1:
+                ts_sample = ts_sample.squeeze(0)
+            
+            # 2. Transpose if BoTorch returned (2, 1017) instead of (1017, 2)
+            if ts_sample.shape == (n_objs, N_pool):
+                ts_sample = ts_sample.transpose(0, 1)
+            elif ts_sample.numel() == N_pool * n_objs and ts_sample.shape != (N_pool, n_objs):
+                # Catch any other weird nested shapes like (1, 1, 1017, 2)
+                ts_sample = ts_sample.reshape(N_pool, n_objs)
+            
+            # Apply the objective function
+            ts_obj = objective(ts_sample)
+            
+            # 3. Bulletproof the objective output shape 
+            if ts_obj.shape != (N_pool, n_objs):
+                if ts_obj.numel() == N_pool * n_objs:
+                    if ts_obj.shape == (n_objs, N_pool):
+                        ts_obj = ts_obj.transpose(0, 1)
+                    else:
+                        ts_obj = ts_obj.reshape(N_pool, n_objs)
+                elif ts_obj.numel() == N_pool:
+                    # Fallback: If the objective mistakenly collapsed to 1D, duplicate it
+                    ts_obj = ts_obj.view(N_pool, 1).repeat(1, n_objs)
+            
+            # 4. THE REAL CULPRIT: Force ref_point to be strictly a flat 1D tensor (2,)
+            # If ref_point was accidentally (2, 1), this completely eliminates the crash!
+            ref_point_flat = ref_point.view(-1)
+            
+            # --- ONE SHOT CALL: Score the entire pool instantly ---
+            scores = _marginal_hvi_scores(ts_obj, current_pareto_Y, ref_point_flat, baseline_hv)
             # Find the best candidate in this TR's pool
             best_local_idx = scores.argmax()
             best_local_score = scores[best_local_idx].item()

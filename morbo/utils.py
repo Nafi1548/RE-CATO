@@ -638,7 +638,8 @@ def get_indices_in_hypercube(
     # --- ADDED TOPOLOGY ARGS ---
     binary_dims: Optional[List[int]] = None,
     ordinal_dims: Optional[List[int]] = None,
-    ordinal_config: Optional[List[int]] = None
+    ordinal_config: Optional[List[int]] = None,
+    use_log_warp=False
 ) -> Tensor:
     r"""Get indices of observed points inside of trust region.
 
@@ -695,8 +696,15 @@ def get_indices_in_hypercube(
                 # raw_gap = (X[:, dim] - X_center[:, dim]).abs()
                 # total_dist += (raw_gap / max_range).float()
                 # Log-warped distance matching the UnifiedL1DiscreteKernel
-                num_gap = (torch.log1p(X[:, dim]) - torch.log1p(X_center[:, dim])).abs()
-                den_gap = torch.log1p(torch.tensor(max_range, dtype=X.dtype, device=X.device))
+                max_range = max(1, ordinal_config[idx] - 1)
+
+                if use_log_warp:
+                    num_gap = (torch.log1p(X[:, dim]) - torch.log1p(X_center[:, dim])).abs()
+                    den_gap = torch.log1p(torch.tensor(max_range, dtype=X.dtype, device=X.device))
+                else:
+                    num_gap = (X[:, dim] - X_center[:, dim]).abs()
+                    den_gap = torch.tensor(max_range, dtype=X.dtype, device=X.device)
+
                 total_dist += (num_gap / den_gap).float()
 
                 
@@ -761,6 +769,7 @@ def get_fitted_model(
     use_unified_kernel: bool = True,
     use_mixture_kernel: bool = False,
     use_casmo_mixed_kernel: bool = False,
+    use_asymmetric_kernel: bool = False,
 ) -> Model:
     # --- ADD THESE TWO LINES AT THE VERY TOP ---
     print("Fitting a model")
@@ -890,6 +899,8 @@ def get_fitted_model(
             #         covar_module = ScaleKernel(binary_kern) + ScaleKernel(ordinal_kern)
             # APPLY THE CASMOPOLITAN MIXED KERNEL HERE:
             if use_casmo_mixed_kernel and cat_dims is not None and cont_dims is not None:
+                print("Mixed Arch. using integer with continuous kernel")
+
                 covar_module = ScaleKernel(
                     MixtureKernel(
                         categorical_dims=cat_dims,
@@ -901,6 +912,7 @@ def get_fitted_model(
                 )
             # 1. PURE DISCRETE (Your Custom Architectures)
             elif binary_dims and not cont_dims:
+                print("Pure Discrete Arch")
                 n_binary = len(binary_dims)
                 total_dims = n_binary + len(ordinal_dims)
                 ls_max_ord = float(n_binary)
@@ -908,7 +920,8 @@ def get_fitted_model(
                 # PATH 1: The Domain-Aware Asymmetric Baseline (Your Original Intent)
                 # F1 (i==0) gets Unified/Interactive, Cost (i==1) gets Additive
                 # ---------------------------------------------------------
-                if not use_unified_kernel and not use_mixture_kernel: # (or explicitly use_asymmetric_kernels)
+                if use_asymmetric_kernel:
+                    print("Diff interaction between seperate kernels for binary and ordinal per objective")
                     if i == 0:
                         # F1 SCORE: Highly Interactive (Unified Product Kernel)
                         unified_config = [1.0] * total_dims
@@ -937,9 +950,10 @@ def get_fitted_model(
                             lengthscale_constraint=Interval(0.01, 2.5),
                         )
                         covar_module = ScaleKernel(binary_kern) + ScaleKernel(ordinal_kern)
-
+                        
                 # PATH A: Mixture Kernel (Learnable Lambda)
-                if use_mixture_kernel:
+                elif use_mixture_kernel:
+                    print("learnable lambda interaction between seperate kernels for binary and ordinal ")
                     covar_module = ScaleKernel(
                         DiscreteMixtureKernel(
                             binary_dims=binary_dims,
@@ -952,6 +966,8 @@ def get_fitted_model(
                 
                 # PATH B: Unified Product Kernel (Strong Interactions)
                 elif use_unified_kernel:
+                    print("only one kernel for binary and ordinal ")
+
                     unified_config = [1.0] * total_dims
                     if ordinal_dims and ordinal_config:
                         for idx, dim in enumerate(ordinal_dims):
@@ -967,6 +983,8 @@ def get_fitted_model(
                 
                 # PATH C: Independent Additive Kernels (No Interactions)
                 else:
+                    print("only additive interaction between seperate kernels for binary and ordinal ")
+
                     binary_kern = UnifiedL1DiscreteKernel(
                         config=[1.0] * n_binary,
                         active_dims=binary_dims,

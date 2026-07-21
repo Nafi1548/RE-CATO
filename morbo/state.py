@@ -967,6 +967,7 @@ class TRBOState(Module):
                 binary_dims=binary_dims,
                 ordinal_dims=ordinal_dims,
                 ordinal_config=ordinal_config,
+                use_log_warp=self.tr_hparams.use_log_warp
             )
 
             device = self.bounds.device

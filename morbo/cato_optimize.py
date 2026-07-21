@@ -7,6 +7,7 @@ import os
 import shutil
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+# from helper import consts2
 import warnings
 import os
 import time
@@ -17,6 +18,9 @@ import argparse
 
 from pprint import pprint
 
+import pandas as pd
+import pickle
+from hypermapper.models.random_forest import RandomForest
 from helper import consts
 from helper import utils
 from helper import prior_injection
@@ -138,6 +142,56 @@ def objective_cato(x):
     optimization_metrics["compute_cost"] = y_compute
     return optimization_metrics
 
+
+def save_hm_native_surrogate(scenario_file, csv_file, output_dir):
+    """
+    Reads the scenario parameters, trains HyperMapper's native surrogate 
+    model on the collected data, and saves it to the output directory.
+    """
+    # 1. Read parameters directly from the generated scenario
+    with open(scenario_file, 'r') as f:
+        scenario = json.load(f)
+        
+    objectives = scenario.get("optimization_objectives", [])
+    input_params = scenario.get("input_parameters", {})
+    
+    # Extract HyperMapper's specific model parameters (defaulting to 10 if not set)
+    hm_model_params = scenario.get("models", {})
+    num_trees = hm_model_params.get("number_of_trees", 10)
+    
+    # 2. Load the optimization history
+    df = pd.read_csv(csv_file)
+    
+    # 3. Format X data to match HyperMapper's internal expectations
+    feature_cols = list(input_params.keys())
+    X_df = df[feature_cols].copy()
+    
+    for col, props in input_params.items():
+        if props.get("parameter_type") == "categorical":
+            # HyperMapper internally maps 'true'/'false' to 1/0
+            X_df[col] = X_df[col].apply(lambda x: 1 if str(x).strip().lower() == 'true' else 0)
+            
+    X = X_df.values
+    
+    # 4. Train a Native HM Model per objective
+    surrogate_models = {}
+    for obj in objectives:
+        y = df[obj].values
+        
+        # Instantiate the model using the exact parameters from the scenario
+        hm_model = RandomForest(
+            parameters={"number_of_trees": num_trees} # Pass scenario configs here
+        )
+        hm_model.fit(X, y)
+        surrogate_models[obj] = hm_model
+        
+    # 5. Serialize and save the dictionary of models
+    pkl_path = os.path.join(output_dir, "hm_native_surrogate.pkl")
+    with open(pkl_path, "wb") as f:
+        pickle.dump(surrogate_models, f)
+        
+    print(utils.GREEN + f"Native HM surrogate successfully saved to {pkl_path}" + utils.RESET)
+
 def hm_run(candidate_features, max_pkt_depth, num_init, num_iter, include_priors, damping_factor, experiment_dir=""):
     """
     Run HyperMapper optimization and save results.
@@ -175,6 +229,15 @@ def hm_run(candidate_features, max_pkt_depth, num_init, num_iter, include_priors
     optimizer.optimize(scenario_file, objective_cato)
     end_ts = time.time()
     print(f"BO elapsed: {end_ts - start_ts}s")
+    # Generate and save the native surrogate model
+    output_csv = os.path.join(output_dir, "post_output_samples.csv")
+    if os.path.exists(output_csv):
+        try:
+            save_hm_native_surrogate(scenario_file, output_csv, output_dir)
+        except Exception as e:
+            print(utils.RED + f"Failed to train native HM surrogate: {e}" + utils.RESET)
+    else:
+        print(utils.YELLOW + f"Output CSV not found. Skipping surrogate model generation." + utils.RESET)
 
     return scenario_file
 

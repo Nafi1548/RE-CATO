@@ -758,7 +758,8 @@ def interleaved_search(x_center, f: Callable,
         n_step = 0
         
         if len(cont_dims) > 0:
-            x_cont_torch = torch.tensor(x_cont, dtype=torch.float32).requires_grad_(True)
+            # x_cont_torch = torch.tensor(x_cont, dtype=torch.float32).requires_grad_(True)
+            x_cont_torch = torch.tensor(x_cont, dtype=lb.dtype, device=lb.device).requires_grad_(True)
             lb_t = torch.tensor(lb, dtype=x_cont_torch.dtype, device=x_cont_torch.device)
             ub_t = torch.tensor(ub, dtype=x_cont_torch.dtype, device=x_cont_torch.device)
             optimizer = torch.optim.Adam([x_cont_torch], lr=0.1)

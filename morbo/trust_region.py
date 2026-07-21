@@ -141,6 +141,7 @@ class TurboHParams:
     use_unified_kernel: bool = False
     use_mixture_kernel: bool = False
     use_casmo_mixed_kernel: bool = False
+    use_asymmetric_kernel: bool = False
 
     n_trust_regions: int = 5
     batch_size: int = 100
@@ -587,7 +588,8 @@ class TrustRegion(ABC, Module):
 
                         # FIX MISALIGNMENT 5: Explicitly kill the TR if Hamming radius is 1 or less
                         if getattr(self.tr_hparams, "binary_dims", None) or getattr(self.tr_hparams, "cat_dims", None):
-                            restart_disc = self.length_discrete.item() <= 1
+                            # restart_disc = self.length_discrete.item() <= 1
+                            restart_disc = self.length_discrete.item() < self.tr_hparams.length_min_discrete
 
                         if restart_cont or restart_disc:
                             return True
@@ -681,7 +683,8 @@ class TrustRegion(ABC, Module):
                 # --- PASSED NEW TOPOLOGY ---
                 binary_dims=self.tr_hparams.binary_dims,
                 ordinal_dims=self.tr_hparams.ordinal_dims,
-                ordinal_config=self.tr_hparams.ordinal_config
+                ordinal_config=self.tr_hparams.ordinal_config,
+                use_log_warp=self.tr_hparams.use_log_warp
             )
         else:
             tr_indices = torch.arange(len(X_all), device=X_all.device)
@@ -1079,7 +1082,8 @@ class HypervolumeTrustRegion(TrustRegion):
                     # --- PASSED NEW TOPOLOGY ---
                     binary_dims=binary_dims,
                     ordinal_dims=ordinal_dims,
-                    ordinal_config=ordinal_config
+                    ordinal_config=ordinal_config,
+                    use_log_warp=self.tr_hparams.use_log_warp
                 )
                 if indices_in_tr.shape[0] > 0:
                     indices = indices_in_tr
@@ -1135,6 +1139,10 @@ class HypervolumeTrustRegion(TrustRegion):
         # ---------------------------------------------------------
         # BUG 6 FIX (Part 2): Protect the final X_center state
         # ---------------------------------------------------------
+        cont_dims = getattr(self.tr_hparams, "cont_dims", [])
+        cat_dims = getattr(self.tr_hparams, "cat_dims", [])
+        binary_dims = getattr(self.tr_hparams, "binary_dims", [])
+        ordinal_dims = getattr(self.tr_hparams, "ordinal_dims", [])
         if cont_dims is not None and len(cont_dims) > 0:
             self.X_center_normalized = safe_normalize(
                 X=self.X_center, 

@@ -3,7 +3,7 @@ import os
 
 # 1. Point to the root directory containing the 'morbo' folder
 # Update this absolute path to wherever your CATO root actually is
-sys.path.append("/home/cato/cato_nafi/morbo") 
+sys.path.append("/home/cato/cato_nafi/morbo/morbo") 
 
 # 2. Point to your helper/measure directory (as it was in your original code)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -21,7 +21,10 @@ import datetime
 import numpy as np
 import argparse
 import torch
+import pandas as pd # Make sure this is at the top of your file
+import numpy as np
 
+import torch
 from pprint import pprint
 
 # Assuming your merged framework is accessible via these imports
@@ -33,7 +36,7 @@ from morbo.discrete_ts_batch import discrete_ts_batch_select
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from helper import consts2
+from helper import consts
 from helper import utils
 from helper import prior_injection
 from measure import measure_compute
@@ -42,7 +45,7 @@ from measure import measure_inference
 # Filter out warnings
 warnings.filterwarnings("ignore")
 
-candidate_features = consts2.candidate_features
+candidate_features = consts.candidate_features
 
 # dimensionality reduction
 mi = prior_injection.compute_mi_scores(candidate_features, pkt_depth="all")
@@ -84,7 +87,7 @@ def evaluate_cato_batch(X_tensor):
 
         # 4. Cleanup: Delete the generated features_* directory
         feature_decimal = utils.feature_decimal(feature_set)
-        dataset_dir = os.path.join(consts2.dataset_dir, f"pkts_{pkt_depth}")
+        dataset_dir = os.path.join(consts.dataset_dir, f"pkts_{pkt_depth}")
         model_dir = os.path.join(dataset_dir, f'features_{feature_decimal}')
 
         if os.path.exists(model_dir):
@@ -99,14 +102,14 @@ def evaluate_cato_batch(X_tensor):
         
     return torch.tensor(Y, dtype=X_tensor.dtype, device=X_tensor.device)
 
-def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, include_priors, damping_factor, experiment_dir="",use_log_warp=False, use_unified_kernel = True, use_mixture_kernel = False, use_casmo_mixed_kernel = False):
+def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, include_priors, damping_factor, experiment_dir="",use_log_warp=False, use_unified_kernel = True, use_mixture_kernel = False, use_casmo_mixed_kernel = False, use_asymmetric_kernel=False, csv_init_path = None):
     """
     Run the custom morbo+casmopolitan optimization and save matching CATO's structure.
     """
     # --- DIRECTORY SETUP (Matching Original CATO) ---
     candidate_decimal = utils.feature_decimal(candidate_features)
     # Using 'merged_' prefix to distinguish from original 'hmp_' (HyperMapper) runs
-    output_dir = os.path.join(consts2.results_dir, f"merged_{candidate_decimal}")
+    output_dir = os.path.join(consts.results_dir, f"merged_{candidate_decimal}")
     os.makedirs(output_dir, exist_ok=True)
     
     if not include_priors:
@@ -175,7 +178,7 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
     
 
     tr_hparams = TurboHParams(
-        restart_hv_scalarizations=True,
+        restart_hv_scalarizations=False,
         n_initial_points=num_init,
         batch_size=1, 
         cat_dims=cat_dims,
@@ -184,9 +187,9 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
         max_reference_point=max_ref_point,
         hypervolume=True,
         use_ard=True,
-        n_trust_regions=2,
+        n_trust_regions=5,
         # --- Add these two lines! ---
-        failure_streak=max(dim // 3, 10),
+        failure_streak=7,
         success_streak=3,
         # ---------------------------- 
         # Memory constraints for Hugepages
@@ -210,7 +213,8 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
         use_log_warp=use_log_warp,
         use_unified_kernel=use_unified_kernel,
         use_mixture_kernel=use_mixture_kernel,
-        use_casmo_mixed_kernel=use_casmo_mixed_kernel
+        use_casmo_mixed_kernel=use_casmo_mixed_kernel,
+        use_asymmetric_kernel=use_asymmetric_kernel
     )
 
     trbo_state = TRBOState(
@@ -238,50 +242,110 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
         torch.ones(dim, dtype=dtype, device=device),
     ])
 
-    # raw_sobol = draw_sobol_samples(bounds=torch.stack([torch.zeros(dim), torch.ones(dim)]).to(device), n=num_init, q=1).squeeze(1)
-    raw_sobol = draw_sobol_samples(bounds=unit_bounds, n=num_init, q=1).squeeze(1)
+    # # raw_sobol = draw_sobol_samples(bounds=torch.stack([torch.zeros(dim), torch.ones(dim)]).to(device), n=num_init, q=1).squeeze(1)
+    # raw_sobol = draw_sobol_samples(bounds=unit_bounds, n=num_init, q=1).squeeze(1)
     
-    # X_init = torch.zeros_like(raw_sobol)
-    X_init = torch.zeros(num_init, dim, dtype=dtype, device=device)
+    # # X_init = torch.zeros_like(raw_sobol)
+    # X_init = torch.zeros(num_init, dim, dtype=dtype, device=device)
     
-    # 2. Map binary variables normally (threshold at 0.5)
-    X_init[:, :num_categorical] = torch.round(raw_sobol[:, :num_categorical])
+    # # 2. Map binary variables normally (threshold at 0.5)
+    # X_init[:, :num_categorical] = torch.round(raw_sobol[:, :num_categorical])
     
-    # # 3. Log-warp the ordinal packet depth variable
-    # # This transforms the [0, 1] draw into an exponentially biased draw towards 0
+    # # # 3. Log-warp the ordinal packet depth variable
+    # # # This transforms the [0, 1] draw into an exponentially biased draw towards 0
+    # # max_val = max_pkt_depth - 1
+    # # X_init[:, num_categorical] = torch.round(torch.exp(raw_sobol[:, num_categorical] * _math.log(max_val + 1)) - 1)
+
+    # # 2. STANDARD LINEAR MAPPING (CATO Baseline)
+    # # This replaces the log-warp so the initial points are uniformly distributed 
+    # # across the entire 0 to 349,999 range.
     # max_val = max_pkt_depth - 1
-    # X_init[:, num_categorical] = torch.round(torch.exp(raw_sobol[:, num_categorical] * _math.log(max_val + 1)) - 1)
-
-    # 2. STANDARD LINEAR MAPPING (CATO Baseline)
-    # This replaces the log-warp so the initial points are uniformly distributed 
-    # across the entire 0 to 349,999 range.
-    max_val = max_pkt_depth - 1
-    # X_init[:, num_categorical] = torch.round(raw_sobol[:, num_categorical] * float(max_val))
+    # # X_init[:, num_categorical] = torch.round(raw_sobol[:, num_categorical] * float(max_val))
     
-    # Ensure strict bounds
+    # # Ensure strict bounds
+    # # X_init[:, num_categorical] = torch.clamp(X_init[:, num_categorical], 0.0, float(max_val))
+
+    # # 2. Ordinal Packet Depth Toggle
+    # max_val = max_pkt_depth - 1
+    # if tr_hparams.use_log_warp:
+    #     # Log-warped initialization (Biased towards 0)
+    #     import math as _math
+    #     X_init[:, num_categorical] = torch.round(
+    #         torch.exp(raw_sobol[:, num_categorical] * _math.log(max_val + 1)) - 1
+    #     )
+    # else:
+    #     # Standard Linear Initialization (Uniform over 0 to 3.5 lacs)
+    #     X_init[:, num_categorical] = torch.round(raw_sobol[:, num_categorical] * float(max_val))
+    
     # X_init[:, num_categorical] = torch.clamp(X_init[:, num_categorical], 0.0, float(max_val))
+    # Y_init = evaluate_cato_batch(X_init)
+   
 
-    # 2. Ordinal Packet Depth Toggle
-    max_val = max_pkt_depth - 1
-    if tr_hparams.use_log_warp:
-        # Log-warped initialization (Biased towards 0)
-        import math as _math
-        X_init[:, num_categorical] = torch.round(
-            torch.exp(raw_sobol[:, num_categorical] * _math.log(max_val + 1)) - 1
-        )
+    # --- 3. Initial Design (Warm-Start vs DoE) ---
+    if csv_init_path is not None and os.path.exists(csv_init_path):
+        print(f"[INFO] Warm-starting initialization from {csv_init_path}")
+        
+        # 1. Read the full CSV
+        df = pd.read_csv(csv_init_path)
+        # --- ADD THIS FIX ---
+        # Override the BO budget so it accounts for the actual size of the CSV
+        actual_csv_samples = len(df)
+        trbo_state.max_evals = actual_csv_samples + num_iter
+        # --------------------
+
+        # ==========================================
+        # 2. EXTRACT OBJECTIVES (Y_init) FIRST
+        # ==========================================
+        # Read the negative F1 score and invert it back to positive (Maximize)
+        y_f1 = -df['neg_f1_score'].astype(float).values
+
+        # Read the compute cost, apply log1p, and negate (Maximize)
+        raw_compute = df['compute_cost'].astype(float).values
+        y_compute = -np.log1p(raw_compute)
+
+        # Stack them into the Y_init tensor
+        Y_init = torch.tensor(np.stack([y_f1, y_compute], axis=1), dtype=dtype, device=device)
+
+        # ==========================================
+        # 3. EXTRACT INPUTS (X_init) SECOND
+        # ==========================================
+        # Slice the DataFrame to drop objective values and metadata
+        input_columns = candidate_features + ['pkt_depth'] 
+        X_df = df[input_columns].copy()
+
+        # Catch HyperMapper booleans before they get destroyed
+        X_df = X_df.replace({'True': 1.0, 'False': 0.0, True: 1.0, False: 0.0})
+
+        # Force numeric and catch any remaining weird formatting
+        X_df = X_df.apply(pd.to_numeric, errors='coerce').fillna(0.0)
+
+        # Explicitly cast to float64 to prevent the numpy.object_ crash
+        X_init = torch.tensor(X_df.values.astype(np.float64), dtype=dtype, device=device)
+        
     else:
-        # Standard Linear Initialization (Uniform over 0 to 3.5 lacs)
+        # Fallback to standard random initialization if no CSV is provided
+        print(f"\n[DoE] Running standard random initialization ({num_init} samples)...")
+        unit_bounds = torch.stack([
+            torch.zeros(dim, dtype=dtype, device=device),
+            torch.ones(dim, dtype=dtype, device=device),
+        ])
+        raw_sobol = draw_sobol_samples(bounds=unit_bounds, n=num_init, q=1).squeeze(1)
+        
+        X_init = torch.zeros(num_init, dim, dtype=dtype, device=device)
+        X_init[:, :num_categorical] = torch.round(raw_sobol[:, :num_categorical])
+        max_val = max_pkt_depth - 1
         X_init[:, num_categorical] = torch.round(raw_sobol[:, num_categorical] * float(max_val))
-    
-    X_init[:, num_categorical] = torch.clamp(X_init[:, num_categorical], 0.0, float(max_val))
-    Y_init = evaluate_cato_batch(X_init)
+        
+        Y_init = evaluate_cato_batch(X_init)
     
     trbo_state.update(X=X_init, Y=Y_init, new_ind=torch.full((X_init.shape[0],), 0, dtype=torch.long, device=device))
     trbo_state.log_restart_points(X=X_init, Y=Y_init)
+    
 
     for i in range(tr_hparams.n_trust_regions):
         trbo_state.initialize_standard(tr_idx=i, restart=False, switch_strategy=False, X_init=X_init, Y_init=Y_init)
 
+    
     trbo_state.update_data_across_trs()
     trbo_state.TR_index_history.fill_(-2)
 
@@ -307,7 +371,82 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
         should_restart_trs = trbo_state.update_trust_regions_and_log(
             X_cand=X_cand, Y_cand=Y_cand, tr_indices=tr_indices, batch_size=tr_hparams.batch_size, verbose=True
         )
+        # =========================================================================
+        # ENHANCED TRUST REGION & PACKET DEPTH LIFE-CYCLE LOGGER
+        # =========================================================================
+        log_file_path = os.path.join(run_output_dir, "tr_behavior_log.txt")
+        n_trs = len(trbo_state.trust_regions)
+        
+        with open(log_file_path, "a") as log_file:
+            log_file.write(f"\n{"="*80}\n=== Iteration {trbo_state.n_evals.item()} ===\n{"="*80}\n")
+            
+            # 1. First, print the active status and packet depth centers of ALL TRs 
+            # This makes it easy to spot if multiple TRs are trapped on the same center.
+            log_file.write("--- CURRENT TRUST REGION STATUSES (ALL) ---\n")
+            for j in range(n_trs):
+                tr_j = trbo_state.trust_regions[j]
+                center_raw = tr_j.X_center.cpu().numpy().flatten()
+                
+                # Physical packet depth center: map internal index back to real world [1, Max]
+                tr_center_pkt_depth = int(np.round(center_raw[-1])) + 1
+                
+                log_file.write(
+                    f"  TR {j} -> Active Center Pkt Depth (Physical): {tr_center_pkt_depth:,} | "
+                    f"Cont Radius: {tr_j.length.item():.4f} | Disc Radius: {int(tr_j.length_discrete.item())}\n"
+                )
+            log_file.write("-" * 50 + "\n")
 
+            # 2. Iterate through the batch of newly generated candidates
+            for idx, tr_idx_tensor in enumerate(tr_indices):
+                selected_tr_idx = tr_idx_tensor.item()
+                tr = trbo_state.trust_regions[selected_tr_idx]
+                
+                # Fetch candidate metrics
+                cand_raw = X_cand[idx].cpu().numpy().flatten()
+                
+                # Physical packet depth of the point chosen to be evaluated
+                cand_pkt_depth_physical = int(np.round(cand_raw[-1])) + 1
+                
+                succ_streak = tr.n_successes.item()
+                fail_streak = tr.n_failures.item()
+                cont_radius = tr.length.item()
+                disc_radius = int(tr.length_discrete.item())
+
+                # Determine TR action status
+                action = "Maintained"
+                if should_restart_trs[selected_tr_idx]:
+                    action = "Destroyed (Restarting)"
+                elif fail_streak == 0 and succ_streak > 0:
+                    if succ_streak % trbo_state.tr_hparams.success_streak == 0:
+                        action = "Expanded"
+                elif succ_streak == 0 and fail_streak > 0:
+                    if fail_streak % trbo_state.tr_hparams.failure_streak == 0:
+                        action = "Reduced"
+
+                # 3. Cross-reference: Track metrics against unselected TR centers
+                log_file.write(f"Candidate {idx} physically evaluated -> Drawn from TR {selected_tr_idx} | Action: {action}\n")
+                log_file.write(f"  -> Evaluated Point Pkt Depth (Physical): {cand_pkt_depth_physical:,}\n")
+                log_file.write(f"  -> Selected TR {selected_tr_idx} Streaks: Succ {succ_streak}/{trbo_state.tr_hparams.success_streak} | Fail {fail_streak}/{trbo_state.tr_hparams.failure_streak}\n")
+                log_file.write(f"  -> Selected TR {selected_tr_idx} Radii: Continuous {cont_radius:.4f} | Discrete {disc_radius}\n")
+                
+                log_file.write("  -> Proximity to UNSELECTED Trust Regions:\n")
+                for unselected_tr_idx in range(n_trs):
+                    if unselected_tr_idx == selected_tr_idx:
+                        continue
+                        
+                    unsel_tr = trbo_state.trust_regions[unselected_tr_idx]
+                    unsel_center_raw = unsel_tr.X_center.cpu().numpy().flatten()
+                    unsel_center_pkt_depth = int(np.round(unsel_center_raw[-1])) + 1
+                    
+                    # Compute distances in global space
+                    pkt_depth_gap = abs(cand_pkt_depth_physical - unsel_center_pkt_depth)
+                    
+                    log_file.write(
+                        f"     vs. TR {unselected_tr_idx} Center Pkt Depth: {unsel_center_pkt_depth:,} "
+                        f"(Delta: {pkt_depth_gap:,} packets)\n"
+                    )
+                log_file.write("\n")
+        # =========================================================================
         switch_strategy = trbo_state.check_switch_strategy()
         if switch_strategy:
             should_restart_trs = [True for _ in should_restart_trs]
@@ -345,13 +484,31 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
     Y_hist_raw = Y_hist_cpu.clone()
     Y_hist_raw[:, 1] = torch.expm1(-Y_hist_cpu[:, 1])  # exp(-y) - 1
 
+    # --- THE FIX: Shift the packet depth history back to physical bounds ---
+    X_hist_cpu = trbo_state.X_history.cpu()
+    X_hist_raw = X_hist_cpu.clone()
+    X_hist_raw[:, -1] += 1  # Add 1 to the packet depth column
+
+    # if trbo_state.pareto_Y is not None:
+    #     pareto_Y_cpu = trbo_state.pareto_Y.cpu()
+    #     pareto_Y_raw = pareto_Y_cpu.clone()
+    #     pareto_Y_raw[:, 1] = torch.expm1(-pareto_Y_cpu[:, 1])
+    # else:
+    #     pareto_Y_cpu = None
+    #     pareto_Y_raw = None
     if trbo_state.pareto_Y is not None:
         pareto_Y_cpu = trbo_state.pareto_Y.cpu()
         pareto_Y_raw = pareto_Y_cpu.clone()
         pareto_Y_raw[:, 1] = torch.expm1(-pareto_Y_cpu[:, 1])
+        
+        pareto_X_cpu = trbo_state.pareto_X.cpu()
+        pareto_X_raw = pareto_X_cpu.clone()
+        pareto_X_raw[:, -1] += 1 # Shift the pareto inputs too
     else:
         pareto_Y_cpu = None
         pareto_Y_raw = None
+        pareto_X_cpu = None
+        pareto_X_raw = None
     # --- SAVE RESULTS ---
     # output_data = {
     #     "X_history": trbo_state.X_history.cpu(),
@@ -363,7 +520,9 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
     # }
     # --- SAVE RESULTS ---
     output_data = {
-        "X_history": trbo_state.X_history.cpu(),
+        # "X_history": trbo_state.X_history.cpu(),
+        "X_history_transformed": X_hist_cpu,  # Internal BO space (0 to 49)
+        "X_history_raw": X_hist_raw,          # Physical Retina space (1 to 50)
         "Y_history_transformed": Y_hist_cpu,  # Keep for debugging the BO space
         "Y_history_raw": Y_hist_raw,          # Use this for publication plots
         "pareto_X": trbo_state.pareto_X.cpu() if trbo_state.pareto_X is not None else None,
@@ -396,9 +555,10 @@ def main(args):
                             float(damping_factor), 
                             experiment_dir=args.experiment_dir,
                             use_log_warp=False, 
-                            use_unified_kernel = True, 
-                            use_mixture_kernel = False, 
-                            use_casmo_mixed_kernel = False
+                            use_unified_kernel=False,       
+                            use_mixture_kernel=True,      
+                            use_casmo_mixed_kernel=False,
+                            use_asymmetric_kernel=False
                         )
 
 if __name__ == "__main__":
@@ -410,6 +570,7 @@ if __name__ == "__main__":
     parser.add_argument("--mixture_kernel", action="store_true", help="Use lambda-weighted mixture kernel")
     parser.add_argument("experiment_dir", type=str, help="Path to experiment output dir")
     parser.add_argument("--unified_kernel", action="store_true", help="Use a single kernel for binary and ordinal dims")
+    parser.add_argument("--asymmetric_kernel", action="store_true", help="Use interactive kernel for F1 and additive for cost") # <--- ADD THIS LINE
     parser.add_argument("--num_trials", type=int, default=1, help="Number of trials")
     parser.add_argument("--priors", action="store_true", help="Include priors")
 

@@ -18,12 +18,21 @@ def process_directory(base_dir):
 
     for i, file in enumerate(pt_files):
         try:
+            # data = torch.load(file, map_location=torch.device('cpu'), weights_only=False)
+            # X, Y = data.get('X_history'), data.get('Y_history')
             data = torch.load(file, map_location=torch.device('cpu'), weights_only=False)
-            X, Y = data.get('X_history'), data.get('Y_history')
+            
+            # Use 'Y_history_raw' for your actual CATO metrics, or 'Y_history_transformed' if you want the BO space
+            X = data.get('X_history')
+            Y = data.get('Y_history_raw') 
             
             if X is None or Y is None: 
-                print(f"Skipping {file}: Missing X_history or Y_history")
+                print(f"Skipping {file}: Missing 'X_history' or 'Y_history_raw'. Keys found: {list(data.keys())}")
                 continue
+            
+            # if X is None or Y is None: 
+            #     print(f"Skipping {file}: Missing X_history or Y_history")
+            #     continue
                 
             X_np, Y_np = X.numpy(), Y.numpy()
             combined = np.hstack((X_np, Y_np))
