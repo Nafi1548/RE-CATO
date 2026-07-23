@@ -75,7 +75,7 @@ def evaluate_cato_batch(X_tensor):
         import math
         # # 3. Evaluate
         # y_f1 = measure_inference.get_f1_score(feature_set, pkt_depth)  
-        # y_compute = measure_compute.get_compute_cost(feature_set, pkt_depth)
+        y_compute = measure_compute.get_compute_cost(feature_set, pkt_depth)
         
         # Evaluate physically
         y_f1 = measure_inference.get_f1_score(feature_set, pkt_depth)  
@@ -83,7 +83,7 @@ def evaluate_cato_batch(X_tensor):
         
         # Log-transform the compute cost before negating it for maximization
         # This perfectly aligns the target surface with the log-warped kernel
-        y_compute = math.log1p(raw_compute)
+        # y_compute = math.log1p(raw_compute)
 
         # 4. Cleanup: Delete the generated features_* directory
         feature_decimal = utils.feature_decimal(feature_set)
@@ -301,7 +301,8 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
 
         # Read the compute cost, apply log1p, and negate (Maximize)
         raw_compute = df['compute_cost'].astype(float).values
-        y_compute = -np.log1p(raw_compute)
+        y_compute = -df['compute_cost'].astype(float).values
+        # y_compute = -np.log1p(raw_compute)
 
         # Stack them into the Y_init tensor
         Y_init = torch.tensor(np.stack([y_f1, y_compute], axis=1), dtype=dtype, device=device)
@@ -481,8 +482,9 @@ def morbo_casmo_run(candidate_features, max_pkt_depth, num_init, num_iter, inclu
 
     # Invert the -log1p transform for the second objective (cost)
     Y_hist_cpu = trbo_state.Y_history.cpu()
-    Y_hist_raw = Y_hist_cpu.clone()
-    Y_hist_raw[:, 1] = torch.expm1(-Y_hist_cpu[:, 1])  # exp(-y) - 1
+    # Y_hist_raw = Y_hist_cpu.clone()
+    # Y_hist_raw[:, 1] = torch.expm1(-Y_hist_cpu[:, 1])  # exp(-y) - 1
+    Y_hist_raw = Y_hist_cpu # not using log cost
 
     # --- THE FIX: Shift the packet depth history back to physical bounds ---
     X_hist_cpu = trbo_state.X_history.cpu()

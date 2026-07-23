@@ -997,9 +997,73 @@ class TRBOState(Module):
             else:
                 value_score = -violation
 
-            ind_best = value_score.argmax()
-            return X_discrete[ind_best, :].unsqueeze(0)
+            # ind_best = value_score.argmax()
+            # return X_discrete[ind_best, :].unsqueeze(0)
 
+            # STEP 3: Isolate the Top-K Seeds
+            K_seeds = 3 # Tunable: Number of local searches to execute
+            top_k_indices = value_score.topk(min(K_seeds, len(value_score))).indices
+            top_k_seeds = X_discrete[top_k_indices]
+
+            # STEP 4: Interleaved Refinement
+            # Define the scalarized objective function for Casmopolitan's local search
+            def f_acq(x):
+                if isinstance(x, np.ndarray):
+                    x_tensor = torch.tensor(x, dtype=dtype, device=device)
+                else:
+                    x_tensor = x.to(dtype).to(device)
+                x_tensor = x_tensor.unsqueeze(0)
+                
+                # Use posterior mean for stable gradient-free local hill-climbing
+                mean = restart_model.posterior(x_tensor).mean.squeeze(0)
+                obj = self.objective(mean)
+                
+                if self.constraints is not None:
+                    c_val = torch.stack([c(mean) for c in self.constraints], dim=-1)
+                    feas_mask = (c_val <= 0.0).all(dim=-1)
+                    viol = torch.clamp(c_val, 0.0).sum(dim=-1)
+                else:
+                    feas_mask = torch.ones(len(obj), device=device, dtype=torch.bool)
+                    viol = torch.zeros(len(obj), dtype=dtype, device=device)
+
+                # Scalarize objectives (e.g., F1 vs Compute Cost) using the fixed weights
+                val = torch.where(feas_mask, obj @ weights, -viol - 1e6)
+                return val.squeeze()
+
+            best_refined_x = None
+            best_refined_score = float("-inf")
+
+            from morbo.localbo_utils import interleaved_search
+            lb_dummy = np.array([])
+            ub_dummy = np.array([])
+
+            # Execute the search initialized from each of the Top-K seeds
+            for seed_idx in range(top_k_seeds.shape[0]):
+                seed_np = top_k_seeds[seed_idx].cpu().numpy()
+                
+                refined_x_np, refined_score = interleaved_search(
+                    x_center=seed_np,
+                    f=f_acq,
+                    binary_dims=binary_dims,
+                    ordinal_dims=ordinal_dims,
+                    ordinal_config=ordinal_config,
+                    cont_dims=[], # Hardcoded empty for pure discrete
+                    config=config,
+                    ub=ub_dummy,
+                    lb=lb_dummy,
+                    max_hamming_dist=len(binary_dims) + len(ordinal_dims), # Unrestricted local Hamming space
+                    n_restart=1, 
+                    batch_size=1,
+                    use_log_warp=self.tr_hparams.use_log_warp,
+                )
+                
+                # STEP 5: Center Selection
+                if refined_score > best_refined_score:
+                    best_refined_score = refined_score
+                    best_refined_x = refined_x_np[0]
+
+            return torch.tensor(best_refined_x, dtype=dtype, device=device).unsqueeze(0)
+        
         # ==============================================================
         # DEFAULT MORBO PURE CONTINUOUS GLOBAL OPTIMIZATION
         # ==============================================================

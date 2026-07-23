@@ -484,33 +484,53 @@ def sample_neighbour_mixed(x, binary_dims: list[int], ordinal_dims: list[int], o
     #     # 4. Map back and clamp
     #     new_val = int(math.exp(z_new)) - 1
     #     x_pert[choice] = max(0, min(max_choices - 1, new_val))
+    # else:
+    #     # Ordinal Topology Step
+    #     idx = random.randint(0, len(ordinal_dims) - 1)
+    #     choice = ordinal_dims[idx]
+    #     max_choices = ordinal_config[idx]
+    #     curr_val = int(x_pert[choice])
+        
+    #     if use_log_warp:
+    #         # Log-Warped Local Step (Exploits percentage changes)
+    #         import math
+    #         z_max = math.log(max_choices)
+    #         z_curr = math.log(curr_val + 1)
+    #         r_log = (tr_ratio * 0.1) * z_max
+    #         z_min_bound = max(0.0, z_curr - r_log)
+    #         z_max_bound = min(z_max, z_curr + r_log)
+    #         z_new = random.uniform(z_min_bound, z_max_bound)
+    #         new_val = int(math.exp(z_new)) - 1
+    #     else:
+    #         # Strict Linear Step (Exploits absolute gaps)
+    #         dynamic_radius = max(1, int(max_choices * tr_ratio * 0.1))
+    #         step = random.randint(1, dynamic_radius) * random.choice([-1, 1])
+    #         new_val = curr_val + step
+            
+    #     x_pert[choice] = max(0, min(max_choices - 1, new_val))
+        
+    # return x_pert
     else:
-        # Ordinal Topology Step
+        # Ordinal Topology Step (Strict +/- 1 Step)
         idx = random.randint(0, len(ordinal_dims) - 1)
         choice = ordinal_dims[idx]
         max_choices = ordinal_config[idx]
         curr_val = int(x_pert[choice])
         
-        if use_log_warp:
-            # Log-Warped Local Step (Exploits percentage changes)
-            import math
-            z_max = math.log(max_choices)
-            z_curr = math.log(curr_val + 1)
-            r_log = (tr_ratio * 0.1) * z_max
-            z_min_bound = max(0.0, z_curr - r_log)
-            z_max_bound = min(z_max, z_curr + r_log)
-            z_new = random.uniform(z_min_bound, z_max_bound)
-            new_val = int(math.exp(z_new)) - 1
-        else:
-            # Strict Linear Step (Exploits absolute gaps)
-            dynamic_radius = max(1, int(max_choices * tr_ratio * 0.1))
-            step = random.randint(1, dynamic_radius) * random.choice([-1, 1])
-            new_val = curr_val + step
-            
-        x_pert[choice] = max(0, min(max_choices - 1, new_val))
+        # Determine valid bounds for the step
+        can_step_down = curr_val > 0
+        can_step_up = curr_val < max_choices - 1
         
-    return x_pert
-
+        valid_steps = []
+        if can_step_down:
+            valid_steps.append(-1)
+        if can_step_up:
+            valid_steps.append(1)
+            
+        # Execute a strict single step
+        if valid_steps:
+            step = random.choice(valid_steps)
+            x_pert[choice] = curr_val + step
 
 def compute_mixed_discrete_distance(x1, x2, binary_dims, ordinal_dims, ordinal_config):
     """

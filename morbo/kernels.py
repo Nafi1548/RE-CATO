@@ -493,6 +493,31 @@ class UnifiedL1DiscreteKernel(Kernel):
         
     #     return k.float()
 
+    # def forward(self, x1, x2, diag=False, **params):
+    #     target_dtype = x1.dtype
+    #     config = self.config.to(target_dtype)
+    #     ls = self.lengthscale.view(1, -1).to(target_dtype) 
+        
+    #     is_ordinal = (config > 1.5).to(target_dtype)
+    #     is_binary = 1.0 - is_ordinal
+        
+    #     diff_bin = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / config
+        
+    #     if self.use_log_warp:
+    #         num = torch.abs(torch.log1p(x1.unsqueeze(-2)) - torch.log1p(x2.unsqueeze(-3)))
+    #         den = torch.log1p(config)
+    #         diff_ord = num / den
+    #     else:
+    #         diff_ord = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / config
+            
+    #     diff = (is_binary * diff_bin) + (is_ordinal * diff_ord)
+    #     k = torch.exp(-(diff * ls).sum(dim=-1))
+        
+    #     out = k.to(target_dtype)
+    #     # Uncomment the line below if you want to see every single sub-kernel call
+    #     # print(f"[DEBUG L1] -> Internal L1 Output dtype: {out.dtype}")
+    #     return out
+
     def forward(self, x1, x2, diag=False, **params):
         target_dtype = x1.dtype
         config = self.config.to(target_dtype)
@@ -501,21 +526,14 @@ class UnifiedL1DiscreteKernel(Kernel):
         is_ordinal = (config > 1.5).to(target_dtype)
         is_binary = 1.0 - is_ordinal
         
+        # Strictly linear differences for both spaces
         diff_bin = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / config
-        
-        if self.use_log_warp:
-            num = torch.abs(torch.log1p(x1.unsqueeze(-2)) - torch.log1p(x2.unsqueeze(-3)))
-            den = torch.log1p(config)
-            diff_ord = num / den
-        else:
-            diff_ord = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / config
+        diff_ord = torch.abs(x1.unsqueeze(-2) - x2.unsqueeze(-3)) / config
             
         diff = (is_binary * diff_bin) + (is_ordinal * diff_ord)
         k = torch.exp(-(diff * ls).sum(dim=-1))
         
         out = k.to(target_dtype)
-        # Uncomment the line below if you want to see every single sub-kernel call
-        # print(f"[DEBUG L1] -> Internal L1 Output dtype: {out.dtype}")
         return out
 
     # def forward(self, x1, x2, diag=False, **params):

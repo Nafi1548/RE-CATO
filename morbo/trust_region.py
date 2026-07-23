@@ -473,54 +473,7 @@ class TrustRegion(ABC, Module):
                 self.Y_estimate = self._get_predictions(self.X)
             else:
                 self.Y_estimate = self.Y
-            # if update_streaks:
-            #     # currently this assumes noiseless observations
-            #     if self._has_improved_objective(n_new):
-            #         self.n_successes.add_(1)
-            #         self.n_failures.zero_()
-            #     else:
-            #         self.n_successes.zero_()
-            #         # NOTE: TuRBO-1 counts batches, but we always add #evals to
-            #         # be consistent with the way we use the success streak.
-            #         self.n_failures.add_(n_new)
-
-            #     if self.n_successes >= self.tr_hparams.success_streak:
-            #         # Expand trust region
-            #         self.length.fill_(
-            #             min(2.0 * self.length, self.tr_hparams.length_max)
-            #         )
-            #         # --- EXPAND DISCRETE LENGTH ---
-            #         new_len_discrete = min(int(2.0 * self.length_discrete.item()), self.tr_hparams.length_max_discrete)
-            #         self.length_discrete.fill_(new_len_discrete)
-            #         # ------------------------------
-            #         self._reset_counters()
-
-            #     elif self.n_failures >= self.tr_hparams.failure_streak:
-            #         # Shrink trust region
-            #         self.length.div_(2.0)
-            #         # --- SHRINK DISCRETE LENGTH ---
-            #         # new_len_discrete = int(self.length_discrete.item() / 2.0)
-            #         new_len_discrete = int(self.length_discrete.item() / 2.0)
-                    
-            #         self.length_discrete.fill_(new_len_discrete)
-            #         # ------------------------------
-            #         self._reset_counters()
-            #         # length is too small, restart the TR
-            #         # if self.length < self.tr_hparams.length_min:
-            #         #     return True
-
-
-            #         # --- RESTART CHECK FOR BOTH SPACES ---
-            #         restart_cont = self.length < self.tr_hparams.length_min
-            #         restart_disc = False
-                    
-            #         # Only trigger discrete restarts if the problem has categorical dimensions
-            #         if self.tr_hparams.cat_dims is not None and len(self.tr_hparams.cat_dims) > 0:
-            #             restart_disc = self.length_discrete < self.tr_hparams.length_min_discrete
-                        
-            #         if restart_cont or restart_disc:
-            #             return True
-            #         # -------------------------------------
+            
         
             if update_streaks:
                     # currently this assumes noiseless observations
@@ -589,7 +542,7 @@ class TrustRegion(ABC, Module):
                         # FIX MISALIGNMENT 5: Explicitly kill the TR if Hamming radius is 1 or less
                         if getattr(self.tr_hparams, "binary_dims", None) or getattr(self.tr_hparams, "cat_dims", None):
                             # restart_disc = self.length_discrete.item() <= 1
-                            restart_disc = self.length_discrete.item() < self.tr_hparams.length_min_discrete
+                            restart_disc = self.length_discrete.item() <= self.tr_hparams.length_min_discrete
 
                         if restart_cont or restart_disc:
                             return True
@@ -1087,6 +1040,9 @@ class HypervolumeTrustRegion(TrustRegion):
                 )
                 if indices_in_tr.shape[0] > 0:
                     indices = indices_in_tr
+                else:
+                    # FIX: TR is completely dominated. Maintain current center and let it die naturally.
+                    return
             if invalid_centers is not None:
                 not_taken_mask = ~(
                     (self.best_X.unsqueeze(1) == invalid_centers.unsqueeze(0))

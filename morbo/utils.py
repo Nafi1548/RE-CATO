@@ -271,38 +271,62 @@ def sample_tr_pure_discrete_subset(best_X, n_discrete_points, length_discrete, b
         total_hamming = length_discrete
         ordinal_moves = 0
         
+        # for idx in range(d_ord):
+        #     n_cat = ordinal_config[idx] 
+        #     current_val = int(X_cand_ord[i, idx].item())
+            
+        #     if use_log_warp:
+        #         # Native log-space draw (Jeffreys)
+        #         import math
+        #         z_max = math.log(n_cat)
+        #         z_curr = math.log(current_val + 1)
+        #         r_log = tr_ratio * z_max
+        #         z_min_bound = max(0.0, z_curr - r_log)
+        #         z_max_bound = min(z_max, z_curr + r_log)
+                
+        #         u = torch.rand(1).item()
+        #         z_new = z_min_bound + u * (z_max_bound - z_min_bound)
+        #         new_val = int(math.exp(z_new)) - 1
+        #     else:
+        #         # Linear uniform draw bounded by TR ratio
+        #         dynamic_radius = max(1, int(n_cat * tr_ratio))
+        #         left_radius = min(dynamic_radius, current_val)
+        #         right_radius = min(dynamic_radius, n_cat - 1 - current_val)
+                
+        #         step = 0
+        #         if left_radius + right_radius > 0:
+        #             step = torch.randint(-left_radius, right_radius + 1, (1,)).item()
+        #         new_val = current_val + step
+
+        #     new_val = max(0, min(n_cat - 1, new_val))
+        #     if new_val != current_val:
+        #         X_cand_ord[i, idx] = new_val
+        #         ordinal_moves += 1
+
+        # Define a hard physical cap for packet depth exploration per step
+        MAX_PKT_STEP = 50 
+
         for idx in range(d_ord):
             n_cat = ordinal_config[idx] 
             current_val = int(X_cand_ord[i, idx].item())
             
-            if use_log_warp:
-                # Native log-space draw (Jeffreys)
-                import math
-                z_max = math.log(n_cat)
-                z_curr = math.log(current_val + 1)
-                r_log = tr_ratio * z_max
-                z_min_bound = max(0.0, z_curr - r_log)
-                z_max_bound = min(z_max, z_curr + r_log)
-                
-                u = torch.rand(1).item()
-                z_new = z_min_bound + u * (z_max_bound - z_min_bound)
-                new_val = int(math.exp(z_new)) - 1
-            else:
-                # Linear uniform draw bounded by TR ratio
-                dynamic_radius = max(1, int(n_cat * tr_ratio))
-                left_radius = min(dynamic_radius, current_val)
-                right_radius = min(dynamic_radius, n_cat - 1 - current_val)
-                
-                step = 0
-                if left_radius + right_radius > 0:
-                    step = torch.randint(-left_radius, right_radius + 1, (1,)).item()
-                new_val = current_val + step
+            # Linear uniform draw bounded by TR ratio and physical cap
+            raw_radius = max(1, int(n_cat * tr_ratio))
+            dynamic_radius = min(MAX_PKT_STEP, raw_radius)
+            
+            left_radius = min(dynamic_radius, current_val)
+            right_radius = min(dynamic_radius, n_cat - 1 - current_val)
+            
+            step = 0
+            if left_radius + right_radius > 0:
+                step = torch.randint(-left_radius, right_radius + 1, (1,)).item()
+            new_val = current_val + step
 
             new_val = max(0, min(n_cat - 1, new_val))
             if new_val != current_val:
                 X_cand_ord[i, idx] = new_val
                 ordinal_moves += 1
-        
+
         # # Spend remaining budget on binary dimensions
         # binary_budget = max(1, total_hamming - ordinal_moves)
         # bit_change = torch.randint(1, min(binary_budget, d_bin) + 1, (1,)).item()
@@ -690,22 +714,32 @@ def get_indices_in_hypercube(
         if has_bin:
             total_dist += ((X[:, binary_dims] - X_center[:, binary_dims]).abs() > eps).sum(dim=1).float()
             
+        # if has_ord:
+        #     for idx, dim in enumerate(ordinal_dims):
+        #         max_range = max(1, ordinal_config[idx] - 1)
+        #         # raw_gap = (X[:, dim] - X_center[:, dim]).abs()
+        #         # total_dist += (raw_gap / max_range).float()
+        #         # Log-warped distance matching the UnifiedL1DiscreteKernel
+        #         max_range = max(1, ordinal_config[idx] - 1)
+
+        #         if use_log_warp:
+        #             num_gap = (torch.log1p(X[:, dim]) - torch.log1p(X_center[:, dim])).abs()
+        #             den_gap = torch.log1p(torch.tensor(max_range, dtype=X.dtype, device=X.device))
+        #         else:
+        #             num_gap = (X[:, dim] - X_center[:, dim]).abs()
+        #             den_gap = torch.tensor(max_range, dtype=X.dtype, device=X.device)
+                # total_dist += (num_gap / den_gap).float()
+ 
         if has_ord:
             for idx, dim in enumerate(ordinal_dims):
                 max_range = max(1, ordinal_config[idx] - 1)
-                # raw_gap = (X[:, dim] - X_center[:, dim]).abs()
-                # total_dist += (raw_gap / max_range).float()
-                # Log-warped distance matching the UnifiedL1DiscreteKernel
-                max_range = max(1, ordinal_config[idx] - 1)
 
-                if use_log_warp:
-                    num_gap = (torch.log1p(X[:, dim]) - torch.log1p(X_center[:, dim])).abs()
-                    den_gap = torch.log1p(torch.tensor(max_range, dtype=X.dtype, device=X.device))
-                else:
-                    num_gap = (X[:, dim] - X_center[:, dim]).abs()
-                    den_gap = torch.tensor(max_range, dtype=X.dtype, device=X.device)
-
+                # Linear normalized gap
+                num_gap = (X[:, dim] - X_center[:, dim]).abs()
+                den_gap = torch.tensor(max_range, dtype=X.dtype, device=X.device)
+                
                 total_dist += (num_gap / den_gap).float()
+
 
                 
         return (total_dist <= length_discrete + eps).nonzero().view(-1)
